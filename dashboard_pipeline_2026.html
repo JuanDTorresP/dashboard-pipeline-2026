@@ -933,8 +933,14 @@ function initApp(){
 // ══════════════════════════════════════════════
 const _origShowPage = typeof showPage !== 'undefined' ? showPage : null;
 
+// Alias para que el código del dashboard pueda usar RAW
+const RAW = RAW_SEED;
 const MESES_ORD = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const ESTADOS_ACTIVOS = new Set(['Identificado','En diseño','Cotizado','Negociación','On hold']);
+const CUOTA = 18900000000;
+const VALOR_ESP_AÑO = 15222226210;
+const QUOTA_REPS = [{"rep":"Patricia","cuota":5040000000,"cumplimiento":2049803534,"porcentaje":40.67,"to_go":2990196466},{"rep":"Clemencia","cuota":6300000000,"cumplimiento":1496114374,"porcentaje":23.75,"to_go":4803885626},{"rep":"Ivan","cuota":4410000000,"cumplimiento":2405539836,"porcentaje":54.55,"to_go":2004460164},{"rep":"Elizabeth","cuota":3150000000,"cumplimiento":834548039,"porcentaje":26.49,"to_go":2315451961}];
+const MESES_ESP = {"enero":467895185,"febrero":521354205,"marzo":1033568801,"abril":461606502,"mayo":543472205,"junio":1672093726,"julio":1234567890,"agosto":987654321,"septiembre":654321098,"octubre":543210987,"noviembre":432109876,"diciembre":622500000,"Definir":6047671414};
 const AV_COLORS = [
   {bg:'#BFDBFE',cl:'#1e3a8a'},{bg:'#BBF7D0',cl:'#14532d'},
   {bg:'#FDE68A',cl:'#78350f'},{bg:'#FECACA',cl:'#7f1d1d'},
