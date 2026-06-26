@@ -819,56 +819,95 @@ function renderRepView(){
   const repContainer = document.getElementById('rep-view-container');
   if(!repContainer) return;
 
-  const myDeals = liveDeals.filter(d => d.rep === currentRep);
-  const activos = myDeals.filter(d => !['Ganado','Perdido','abandonado'].includes(d.estado));
-  const ganados = myDeals.filter(d => d.estado==='Ganado');
+  const myDeals = liveDeals.filter(d => d.rep === currentRep && d.oportunidad && d.cuenta);
+  const activos  = myDeals.filter(d => ESTADOS_ACTIVOS.has(d.estado));
+  const ganados  = myDeals.filter(d => d.estado==='Ganado');
   const perdidos = myDeals.filter(d => d.estado==='Perdido');
+  const cerrados = [...ganados, ...perdidos];
 
-  const valorActivo  = activos.reduce((s,d)=>s+(d.valor||0),0);
-  const valorGanado  = ganados.reduce((s,d)=>s+(d.valor||0),0);
-  const valorEsperado = myDeals.reduce((s,d)=>s+(d.esperado||0),0);
+  const valorTotal    = myDeals.reduce((s,d)=>s+(d.valor||0),0);
+  const valorActivo   = activos.reduce((s,d)=>s+(d.valor||0),0);
+  const valorGanado   = ganados.reduce((s,d)=>s+(d.valor||0),0);
+  const valorPerdido  = perdidos.reduce((s,d)=>s+(d.valor||0),0);
+  const valorEsperado = activos.reduce((s,d)=>s+(d.esperado||0),0);
+  const winRate = cerrados.length>0 ? Math.round(ganados.length/cerrados.length*100) : 0;
 
-  const quotaData = QUOTA_REPS.find(q=>q.rep===currentRep) || {cuota:0,cumplimiento:0,porcentaje:0};
+  const quotaData = QUOTA_REPS.find(q=>q.rep===currentRep) || {cuota:0,cumplimiento:0,porcentaje:0,to_go:0};
   const pct = Math.min(quotaData.porcentaje||0, 100);
   const barColor = pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
 
-  repContainer.innerHTML = `
-    <div class="rep-hero">
-      <div class="rep-hero-name">👋 Hola, ${currentRep}</div>
-      <div class="rep-hero-sub">Tu pipeline personalizado • ${new Date().toLocaleDateString('es-CO',{month:'long',year:'numeric'})}</div>
-    </div>
-    <div class="rep-metrics">
-      <div class="rep-metric">
-        <div class="rep-metric-lbl">Pipeline Activo</div>
-        <div class="rep-metric-val">${fmt(valorActivo)}</div>
-        <div class="rep-metric-sub">${activos.length} oportunidades</div>
-      </div>
-      <div class="rep-metric">
-        <div class="rep-metric-lbl">Ganado 2026</div>
-        <div class="rep-metric-val" style="color:#16a34a">${fmt(valorGanado)}</div>
-        <div class="rep-metric-sub">${ganados.length} cierres</div>
-      </div>
-      <div class="rep-metric">
-        <div class="rep-metric-lbl">Valor Esperado</div>
-        <div class="rep-metric-val" style="color:#2563EB">${fmt(valorEsperado)}</div>
-        <div class="rep-metric-sub">prob. ponderado</div>
-      </div>
-      <div class="rep-metric">
-        <div class="rep-metric-lbl">Perdidas</div>
-        <div class="rep-metric-val" style="color:#dc2626">${perdidos.length}</div>
-        <div class="rep-metric-sub">oportunidades</div>
-      </div>
-    </div>
-    ${quotaData.cuota>0?`
-    <div class="card" style="margin-bottom:16px">
-      <p class="section-lbl">Avance vs Cuota</p>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-        <span style="font-size:13px;font-weight:600">${currentRep}</span>
-        <span style="font-size:12px;color:#6b6b67">${fmt(quotaData.cumplimiento)} / ${fmt(quotaData.cuota)} &nbsp;<strong style="color:${barColor}">${quotaData.porcentaje}%</strong></span>
-      </div>
-      <div class="rep-quota-bar-bg"><div class="rep-quota-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-    </div>`:''}
-  `;
+  const estadoBreak = {};
+  activos.forEach(d=>{ estadoBreak[d.estado]=(estadoBreak[d.estado]||0)+1; });
+
+  const top5 = [...activos].sort((a,b)=>(b.valor||0)-(a.valor||0)).slice(0,5);
+
+  const estadoRows = Object.entries(estadoBreak).sort((a,b)=>b[1]-a[1]).map(([est,cnt])=>{
+    const s=EST_STYLE[est]||{bg:'#f0efe9',cl:'#6b6b67'};
+    const total=activos.length||1;
+    const w=Math.round(cnt/total*100);
+    return '<div style="margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<span style="font-size:12px;font-weight:500;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+est+'</span>'
+        +'<span style="font-size:12px;color:#6b6b67">'+cnt+' · '+w+'%</span>'
+      +'</div>'
+      +'<div style="height:6px;background:#f0efe9;border-radius:99px;overflow:hidden">'
+        +'<div style="width:'+w+'%;height:100%;background:'+s.cl+';border-radius:99px;opacity:.7"></div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  const top5Rows = top5.length===0
+    ? '<p style="font-size:12px;color:#9b9b96">Sin oportunidades activas</p>'
+    : top5.map(function(d,i){
+        window._repTop5 = window._repTop5||[];
+        window._repTop5[i] = d;
+        var s=EST_STYLE[d.estado]||{bg:'#f0efe9',cl:'#6b6b67'};
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer" onclick="openModal(window._repTop5['+i+'])">'
+          +'<div>'
+            +'<div style="font-size:12px;font-weight:600;color:#1a1a18">'+d.oportunidad+'</div>'
+            +'<div style="font-size:11px;color:#6b6b67">'+d.cuenta+'</div>'
+          +'</div>'
+          +'<div style="text-align:right">'
+            +'<div style="font-size:12px;font-weight:700">'+fmt(d.valor||0)+'</div>'
+            +'<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span>'
+          +'</div>'
+        +'</div>';
+      }).join('');
+
+  const quotaBlock = quotaData.cuota>0
+    ? '<div class="card" style="margin-bottom:14px">'
+        +'<p class="section-lbl">Avance vs Cuota 2026</p>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">'
+          +'<span style="font-size:24px;font-weight:700;color:'+barColor+'">'+pct+'%</span>'
+          +'<div style="display:flex;gap:16px;font-size:12px">'
+            +'<span style="color:#16a34a">✓ '+fmt(quotaData.cumplimiento)+'</span>'
+            +'<span style="color:#6b6b67">Meta: '+fmt(quotaData.cuota)+'</span>'
+            +'<span style="color:#d97706">Falta: '+fmt(Math.max(quotaData.to_go||0,0))+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<div class="rep-quota-bar-bg" style="height:14px">'
+          +'<div class="rep-quota-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div>'
+        +'</div>'
+      +'</div>'
+    : '';
+
+  repContainer.innerHTML =
+    '<div class="rep-hero">'
+      +'<div class="rep-hero-name">👋 '+currentRep+'</div>'
+      +'<div class="rep-hero-sub">'+new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div>'
+    +'</div>'
+    +'<div class="rep-metrics">'
+      +'<div class="rep-metric"><div class="rep-metric-lbl">Pipeline Total</div><div class="rep-metric-val">'+fmt(valorTotal)+'</div><div class="rep-metric-sub">'+myDeals.length+' oportunidades</div></div>'
+      +'<div class="rep-metric"><div class="rep-metric-lbl">Pipeline Activo</div><div class="rep-metric-val" style="color:#2563EB">'+fmt(valorActivo)+'</div><div class="rep-metric-sub">'+activos.length+' en curso</div></div>'
+      +'<div class="rep-metric"><div class="rep-metric-lbl">Ganado 2026</div><div class="rep-metric-val" style="color:#16a34a">'+fmt(valorGanado)+'</div><div class="rep-metric-sub">'+ganados.length+' cierres · Win rate '+winRate+'%</div></div>'
+      +'<div class="rep-metric"><div class="rep-metric-lbl">Perdido</div><div class="rep-metric-val" style="color:#dc2626">'+fmt(valorPerdido)+'</div><div class="rep-metric-sub">'+perdidos.length+' oportunidades</div></div>'
+      +'<div class="rep-metric"><div class="rep-metric-lbl">Valor Esperado</div><div class="rep-metric-val" style="color:#7c3aed">'+fmt(valorEsperado)+'</div><div class="rep-metric-sub">prob. ponderado activos</div></div>'
+    +'</div>'
+    + quotaBlock
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
+      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Por Estado</p>'+estadoRows+'</div>'
+      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Top Activas</p>'+top5Rows+'</div>'
+    +'</div>';
 }
 
 // ══════════════════════════════════════════════
@@ -1002,6 +1041,13 @@ function populateFilters(){
   reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rSel.appendChild(o);});
   estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
   origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
+  // Si es Rep, fijar y bloquear el filtro de Rep
+  if(currentRole==='rep' && currentRep){
+    rSel.value = currentRep;
+    rSel.disabled = true;
+    rSel.style.opacity = '0.6';
+    rSel.style.cursor = 'not-allowed';
+  }
 }
 
 function applyFilters(){
@@ -1376,32 +1422,36 @@ window.applyFilters = function(){
 function renderRepTable(){
   const wrap = document.getElementById('rep-table-wrap');
   if(!wrap) return;
-  const myDeals = liveDeals.filter(d=>d.rep===currentRep)
-    .filter(d=>d.oportunidad && d.cuenta)
+  window._repTableData = liveDeals.filter(d=>d.rep===currentRep && d.oportunidad && d.cuenta)
     .sort((a,b)=>(b.valor||0)-(a.valor||0));
 
-  wrap.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="border-bottom:1.5px solid rgba(0,0,0,0.08)">
-      <th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">OPORTUNIDAD</th>
-      <th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">CUENTA</th>
-      <th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">ESTADO</th>
-      <th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">VALOR</th>
-      <th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">PROB</th>
-      <th style="padding:8px 4px"></th>
-    </tr></thead>
-    <tbody>
-    ${myDeals.map(d=>`
-      <tr style="border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer" onmouseover="this.style.background='#f8f8f6'" onmouseout="this.style.background=''">
-        <td style="padding:9px 10px;font-weight:500">${d.oportunidad}</td>
-        <td style="padding:9px 10px;color:#6b6b67">${d.cuenta}</td>
-        <td style="padding:9px 10px">${rBadge(d.estado)}</td>
-        <td style="padding:9px 10px;text-align:right;font-weight:600">${fmt(d.valor||0)}</td>
-        <td style="padding:9px 10px;text-align:right;color:#6b6b67">${Math.round((d.prob||0)*100)}%</td>
-        <td style="padding:9px 4px"><button class="btn-edit-row" onclick='openModal(${JSON.stringify(d).replace(/'/g,"\\'")})'  title="Editar">✏️</button></td>
-      </tr>`).join('')}
-    </tbody>
-  </table>`;
+  var rows = window._repTableData.map(function(d,idx){
+    var s = EST_STYLE[d.estado]||{bg:'#f0efe9',cl:'#6b6b67'};
+    var badgeHtml = '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span>';
+    return '<tr style="border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer"'
+      +'>'  
+      +'<td style="padding:9px 10px;font-weight:500">'+d.oportunidad+'</td>'
+      +'<td style="padding:9px 10px;color:#6b6b67">'+d.cuenta+'</td>'
+      +'<td style="padding:9px 10px">'+badgeHtml+'</td>'
+      +'<td style="padding:9px 10px;text-align:right;font-weight:600">'+fmt(d.valor||0)+'</td>'
+      +'<td style="padding:9px 10px;text-align:right;color:#6b6b67">'+Math.round((d.prob||0)*100)+'%</td>'
+      +'<td style="padding:9px 4px"><button class="btn-edit-row" onclick="openModal(window._repTableData['+idx+'])" title="Editar">✏️</button></td>'
+      +'</tr>';
+  }).join('');
+
+  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<thead><tr style="border-bottom:1.5px solid rgba(0,0,0,0.08)">'
+      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">OPORTUNIDAD</th>'
+      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">CUENTA</th>'
+      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">ESTADO</th>'
+      +'<th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">VALOR</th>'
+      +'<th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">PROB</th>'
+      +'<th style="padding:8px 4px"></th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+  +'</table>';
 }
+
 
 // Wire up init
 document.getElementById('navDate').textContent='Jun 2026';
