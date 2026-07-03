@@ -569,6 +569,7 @@ function initFirebase(){
       } else {
         liveDeals = Object.entries(data).map(function(e){ return Object.assign({}, e[1], {_key:e[0]}); });
         window._liveData = liveDeals;
+        populateFilters();
         applyFilters();
         if(currentRole==='rep'){ renderRepView(); renderRepTable(); }
         setSyncStatus('synced');
