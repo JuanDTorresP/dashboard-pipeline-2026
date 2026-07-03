@@ -561,7 +561,7 @@ function initFirebase(){
 // ═══════════════════════════════════════════════════════════
 // MODAL ADD/EDIT
 // ═══════════════════════════════════════════════════════════
-function openModal(deal){
+function openOppModal(deal){
   if(typeof deal === 'number') deal = window._tableData && window._tableData[deal];
   _editingKey = (deal && deal._key) ? deal._key : null;
   document.getElementById('modal-title').textContent = deal ? 'Editar Oportunidad' : 'Nueva Oportunidad';
@@ -653,7 +653,7 @@ function renderNavUser(){
       + '<span class="user-role-badge '+roleClass+'">'+roleLabel+'</span>'
     + '</div>'
     + '<button class="btn-logout" id="nav-logout-btn">Salir</button>';
-  document.getElementById('nav-add-btn').addEventListener('click', function(){ openModal(null); });
+  document.getElementById('nav-add-btn').addEventListener('click', function(){ openOppModal(null); });
   document.getElementById('nav-logout-btn').addEventListener('click', logout);
 }
 
@@ -719,7 +719,7 @@ function renderRepView(){
         var div=document.createElement('div');
         div.style.cssText='display:flex;justify-content:space-between;padding:8px;border-radius:8px;cursor:pointer';
         div.dataset.idx=i;
-        div.addEventListener('click',function(){ openModal(window._repTop5[parseInt(this.dataset.idx)]); });
+        div.addEventListener('click',function(){ openOppModal(window._repTop5[parseInt(this.dataset.idx)]); });
         div.innerHTML='<div>'
           +'<div style="font-size:12px;font-weight:600">'+d.oportunidad+'</div>'
           +'<div style="font-size:11px;color:#6b6b67">'+d.cuenta+'</div></div>'
@@ -873,7 +873,7 @@ function renderRepTable(){
     var eb=document.createElement('button');
     eb.className='btn-edit-row'; eb.title='Editar'; eb.textContent='✏️';
     eb.dataset.idx=idx;
-    eb.addEventListener('click',function(e){ e.stopPropagation(); openModal(window._repTableData[parseInt(this.dataset.idx)]); });
+    eb.addEventListener('click',function(e){ e.stopPropagation(); openOppModal(window._repTableData[parseInt(this.dataset.idx)]); });
     tde.appendChild(eb); tr.appendChild(tde); tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -909,6 +909,9 @@ function initApp(){
       var rSel=document.getElementById('fRep');
       if(rSel && currentRep){ rSel.value=currentRep; rSel.disabled=true; rSel.style.opacity='0.6'; rSel.style.cursor='not-allowed'; }
     });
+    // Mi Pipeline es la vista inicial del rep: la barra de filtros global no aplica ahí
+    var globalFilters = document.querySelector('.filters');
+    if(globalFilters) globalFilters.style.display = 'none';
   }
   initFirebase();
   // Immediate render with local data
@@ -1036,15 +1039,20 @@ let charts={};
 
 function populateFilters(){
   const data=getCleanData();
-  const reps=[...new Set(data.map(r=>r.rep))].sort();
-  const estados=[...new Set(data.map(r=>r.estado))].sort();
-  const origenes=[...new Set(data.map(r=>r.origen))].sort();
+  const norm=v=>(v==null?'':String(v).trim());
+  const reps=[...new Set(data.map(r=>norm(r.rep)))].filter(Boolean).sort();
+  const estados=[...new Set(data.map(r=>norm(r.estado)))].filter(Boolean).sort();
+  const origenes=[...new Set(data.map(r=>norm(r.origen)))].filter(Boolean).sort();
   const rSel=document.getElementById('fRep');
   const eSel=document.getElementById('fEstado');
   const oSel=document.getElementById('fOrigen');
+  // Deja solo la opción "Todos" (primera) y elimina cualquier opción agregada antes,
+  // así populateFilters() es seguro de llamar más de una vez sin duplicar la lista.
+  [rSel,eSel,oSel].forEach(sel=>{ while(sel.options.length>1) sel.remove(1); });
   reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rSel.appendChild(o);});
   estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
   origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
+  document.dispatchEvent(new Event('filtersReady'));
 }
 
 function applyFilters(){
@@ -1344,6 +1352,8 @@ function showPage(id,btn){
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   btn.classList.add('active');
+  var globalFilters = document.querySelector('.filters');
+  if(globalFilters) globalFilters.style.display = (id==='rep-view') ? 'none' : 'flex';
 }
 
 // ═══════════════════════════════════════
@@ -1368,7 +1378,7 @@ applyFilters();
         var btn=document.createElement('button');
         btn.className='btn-edit-row'; btn.title='Editar'; btn.textContent='✏️';
         btn.dataset.idx=i-1;
-        btn.addEventListener('click',function(e){ e.stopPropagation(); openModal(window._tableData[parseInt(this.dataset.idx)]); });
+        btn.addEventListener('click',function(e){ e.stopPropagation(); openOppModal(window._tableData[parseInt(this.dataset.idx)]); });
         td.appendChild(btn); tr.appendChild(td);
       });
       if(currentRole==='rep') renderRepTable();
