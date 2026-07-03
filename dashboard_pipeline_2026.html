@@ -189,7 +189,8 @@ nav{background:var(--txt);color:#fff;padding:0 20px;display:flex;align-items:cen
 .prog-fill{height:100%;border-radius:99px;transition:width .5s}
 
 /* REP ROW */
-.rep-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.rep-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .12s;border-radius:8px}
+.rep-row:hover{background:var(--s2)}
 .rep-row:last-child{border-bottom:none}
 .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
 .rep-meta{flex:1;min-width:0}
@@ -316,6 +317,7 @@ tr:last-child td{border-bottom:none}
         <div class="form-group"><label class="form-label">Riesgo</label>
           <select class="form-select" id="f-riesgo"><option value="">Sin definir</option><option>bajo</option><option>Medio</option><option>Alto</option></select>
         </div>
+        <div class="form-group"><label class="form-label">Segmento</label><input class="form-input" id="f-segmento" placeholder="Ej: Corporativo, PYME, Gobierno..."/></div>
         <div class="form-group"><label class="form-label">Mes Inicio</label>
           <select class="form-select" id="f-mes_inicio"><option value="">-</option><option>enero</option><option>febrero</option><option>marzo</option><option>abril</option><option>mayo</option><option>junio</option><option>julio</option><option>agosto</option><option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option></select>
         </div>
@@ -355,6 +357,7 @@ tr:last-child td{border-bottom:none}
   <div class="filter-chip"><label>Estado</label><select id="fEstado" onchange="applyFilters()"><option value="">Todos</option></select></div>
   <div class="filter-chip"><label>Canal</label><select id="fCanal" onchange="applyFilters()"><option value="">Todos</option><option>Directo</option><option>Indirecto</option></select></div>
   <div class="filter-chip"><label>Origen</label><select id="fOrigen" onchange="applyFilters()"><option value="">Todos</option></select></div>
+  <div class="filter-chip"><label>Segmento</label><select id="fSegmento" onchange="applyFilters()"><option value="">Todos</option></select></div>
   <div class="search-wrap"><input id="search" placeholder="Buscar cuenta u oportunidad…" oninput="applyFilters()"></div>
   <button class="btn-reset" onclick="resetFilters()">Limpiar</button>
   <span id="filterCount" style="font-size:11px;color:var(--txt3)"></span>
@@ -415,7 +418,7 @@ tr:last-child td{border-bottom:none}
 <!-- PIPELINE TABLE -->
 <div class="page" id="page-pipeline">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-    <p class="section-lbl" style="margin:0">Detalle del pipeline activo</p>
+    <p class="section-lbl" style="margin:0">Detalle de oportunidades (usa los filtros de arriba para acotar)</p>
     <span id="tbl-count" style="font-size:11px;color:var(--txt3)"></span>
   </div>
   <div class="card" style="padding:0 16px 16px">
@@ -431,6 +434,7 @@ tr:last-child td{border-bottom:none}
             <th onclick="sortTable('esperado')" style="text-align:right">Esp. <span class="sort-ico">↕</span></th>
             <th onclick="sortTable('canal')">Canal <span class="sort-ico">↕</span></th>
             <th onclick="sortTable('origen')">Origen <span class="sort-ico">↕</span></th>
+            <th onclick="sortTable('segmento')">Segmento <span class="sort-ico">↕</span></th>
             <th onclick="sortTable('riesgo')">Riesgo <span class="sort-ico">↕</span></th>
           </tr>
         </thead>
@@ -583,7 +587,7 @@ function openOppModal(deal){
   _editingKey = (deal && deal._key) ? deal._key : null;
   document.getElementById('modal-title').textContent = deal ? 'Editar Oportunidad' : 'Nueva Oportunidad';
   document.getElementById('btn-delete-opp').style.display = deal ? 'block' : 'none';
-  var fields = ['oportunidad','cuenta','rep','estado','tipo','canal','origen','riesgo','mes_inicio','mes_radicacion','broker','motivo_perdida','comentarios'];
+  var fields = ['oportunidad','cuenta','rep','estado','tipo','canal','origen','riesgo','segmento','mes_inicio','mes_radicacion','broker','motivo_perdida','comentarios'];
   fields.forEach(function(f){
     var el = document.getElementById('f-'+f);
     if(el) el.value = (deal && deal[f]) ? deal[f] : '';
@@ -612,6 +616,7 @@ function saveOpp(){
     canal:document.getElementById('f-canal').value,
     origen:document.getElementById('f-origen').value,
     riesgo:document.getElementById('f-riesgo').value,
+    segmento:document.getElementById('f-segmento').value.trim(),
     mes_inicio:document.getElementById('f-mes_inicio').value,
     mes_radicacion:document.getElementById('f-mes_radicacion').value,
     broker:document.getElementById('f-broker').value,
@@ -1060,15 +1065,18 @@ function populateFilters(){
   const reps=[...new Set(data.map(r=>norm(r.rep)))].filter(Boolean).sort();
   const estados=[...new Set(data.map(r=>norm(r.estado)))].filter(Boolean).sort();
   const origenes=[...new Set(data.map(r=>norm(r.origen)))].filter(Boolean).sort();
+  const segmentos=[...new Set(data.map(r=>norm(r.segmento)))].filter(Boolean).sort();
   const rSel=document.getElementById('fRep');
   const eSel=document.getElementById('fEstado');
   const oSel=document.getElementById('fOrigen');
+  const sgSel=document.getElementById('fSegmento');
   // Deja solo la opción "Todos" (primera) y elimina cualquier opción agregada antes,
   // así populateFilters() es seguro de llamar más de una vez sin duplicar la lista.
-  [rSel,eSel,oSel].forEach(sel=>{ while(sel.options.length>1) sel.remove(1); });
+  [rSel,eSel,oSel,sgSel].forEach(sel=>{ while(sel.options.length>1) sel.remove(1); });
   reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rSel.appendChild(o);});
   estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
   origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
+  segmentos.forEach(s=>{const el=document.createElement('option');el.value=s;el.textContent=s;sgSel.appendChild(el);});
   document.dispatchEvent(new Event('filtersReady'));
 }
 
@@ -1077,6 +1085,7 @@ function applyFilters(){
   const estado=document.getElementById('fEstado').value;
   const canal=document.getElementById('fCanal').value;
   const origen=document.getElementById('fOrigen').value;
+  const segmento=document.getElementById('fSegmento').value;
   const q=document.getElementById('search').value.toLowerCase();
   const data=getCleanData();
   filtered=data.filter(r=>
@@ -1084,6 +1093,7 @@ function applyFilters(){
     (!estado||r.estado===estado)&&
     (!canal||r.canal===canal)&&
     (!origen||r.origen===origen)&&
+    (!segmento||r.segmento===segmento)&&
     (!q||(r.oportunidad+r.cuenta).toLowerCase().includes(q))
   );
   document.getElementById('filterCount').textContent=filtered.length!==data.length?`${filtered.length} de ${data.length} registros`:'';
@@ -1091,9 +1101,18 @@ function applyFilters(){
 }
 
 function resetFilters(){
-  ['fRep','fEstado','fCanal','fOrigen'].forEach(id=>document.getElementById(id).value='');
+  ['fRep','fEstado','fCanal','fOrigen','fSegmento'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('search').value='';
   applyFilters();
+}
+
+function goToRepDetail(rep){
+  const rSel=document.getElementById('fRep');
+  if(rSel.disabled) return; // un rep no debe poder ver el detalle de otro
+  rSel.value=rep;
+  applyFilters();
+  const pipelineBtn=Array.from(document.querySelectorAll('.nav-tab')).find(b=>b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'pipeline'"));
+  if(pipelineBtn) showPage('pipeline',pipelineBtn);
 }
 
 // ═══════════════════════════════════════
@@ -1122,7 +1141,7 @@ function render(){
 
   renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanado,totalPerdido,fPct);
   renderVendedor(activos,ganados);
-  renderTable(activos);
+  renderTable(filtered);
   renderGanadasPerdidas(ganados,perdidos,totalGanado,totalPerdido);
 }
 
@@ -1190,16 +1209,19 @@ function renderVendedor(activos,ganados){
   document.getElementById('mg-replist').innerHTML=repData.map(d=>{
     const c=getAv(d.rep);
     const w=Math.round(d.activo/maxV*100);
-    return`<div class="rep-row">
+    return`<div class="rep-row" data-rep="${d.rep}" title="Ver todas las oportunidades de ${d.rep}">
       <div class="av" style="background:${c.bg};color:${c.cl}">${initials(d.rep)}</div>
       <div class="rep-meta">
         <div class="rep-name">${d.rep}</div>
         <div class="prog-bg"><div class="prog-fill" style="width:${w}%;background:${c.cl}"></div></div>
         <div class="rep-sub">${d.count} ops activas · Esp: ${fmt(d.esperado)}</div>
       </div>
-      <div class="rep-val">${fmt(d.activo)}</div>
+      <div class="rep-val">${fmt(d.activo)}<div style="font-size:10px;color:var(--txt3);font-weight:400">ver detalle ›</div></div>
     </div>`;
   }).join('');
+  document.querySelectorAll('#mg-replist .rep-row').forEach(function(row){
+    row.addEventListener('click', function(){ goToRepDetail(this.dataset.rep); });
+  });
 
   // Rep donut
   mkChart('ch-repdonut',{type:'doughnut',data:{labels:repData.map(d=>d.rep),datasets:[{data:repData.map(d=>d.activo),backgroundColor:repData.map(d=>getAv(d.rep).bg),borderColor:repData.map(d=>getAv(d.rep).cl),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}}}});
@@ -1211,7 +1233,7 @@ function renderVendedor(activos,ganados){
 // ── TABLE ──────────────────────────
 function sortTable(key){
   if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}
-  renderTable(filtered.filter(r=>ESTADOS_ACTIVOS.has(r.estado)));
+  renderTable(filtered);
   document.querySelectorAll('th').forEach(th=>{th.classList.remove('sorted');if(th.getAttribute('onclick')?.includes(`'${key}'`))th.classList.add('sorted');});
 }
 
@@ -1232,6 +1254,7 @@ function renderTable(activos){
       <td style="text-align:right;color:var(--txt2)">${fmt(r.esperado)}</td>
       <td>${badge(r.canal,r.canal==='Directo'?{bg:'#EFF6FF',cl:'#1d4ed8'}:{bg:'#EDE9FE',cl:'#6d28d9'})}</td>
       <td style="color:var(--txt2);font-size:11px">${r.origen}</td>
+      <td style="color:var(--txt2);font-size:11px">${r.segmento||'—'}</td>
       <td>${rBadge(r.riesgo)}</td>
     </tr>`).join('');
   window._tableData=sorted;
