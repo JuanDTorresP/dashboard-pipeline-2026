@@ -9,7 +9,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyAUwxFwB735ccUGozQPst8KPZsShywRroU",
     authDomain: "pipeline-2026-2a573.firebaseapp.com",
@@ -19,7 +18,6 @@
     messagingSenderId: "96652860407",
     appId: "1:96652860407:web:0f611208437c6e788cecf2"
   };
-
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   window._db = db;
@@ -33,31 +31,39 @@
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 <style>
-/* ── LOGIN ── */
+/* LOGIN */
 #login-screen{position:fixed;inset:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
 .login-box{background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
 .login-logo{font-size:36px;margin-bottom:8px}
-.login-title{font-size:20px;font-weight:700;color:#1a1a18;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.login-title{font-size:20px;font-weight:700;color:#1a1a18;margin-bottom:4px}
 .login-sub{font-size:13px;color:#6b6b67;margin-bottom:24px}
-.login-field{width:100%;padding:11px 14px;border:1.5px solid #e5e5e3;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;transition:border .2s;text-align:left}
+.login-field{width:100%;padding:11px 14px;border:1.5px solid #e5e5e3;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;transition:border .2s;text-align:left;box-sizing:border-box}
 .login-field:focus{border-color:#2563EB}
 .login-btn{width:100%;margin-top:6px;padding:12px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
 .login-btn:hover{background:#1d4ed8}
 .login-error{margin-top:10px;font-size:13px;color:#dc2626;min-height:18px}
-/* ── USER BADGE ── */
-.user-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:99px;padding:4px 12px 4px 6px;cursor:default}
+/* USER BADGE */
+.user-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:99px;padding:4px 12px 4px 6px}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:#2563EB;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
 .user-name{font-size:12px;color:rgba(255,255,255,0.85);font-weight:500}
 .user-role-badge{font-size:10px;padding:1px 6px;border-radius:99px;font-weight:600}
 .role-gerencia{background:#fef3c7;color:#92400e}
 .role-rep{background:#dcfce7;color:#166534}
-.btn-logout{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;transition:all .15s}
+.btn-logout{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px}
 .btn-logout:hover{background:rgba(255,255,255,0.1);color:#fff}
-/* ── ADD/EDIT MODAL ── */
+.btn-add-opp{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-add-opp:hover{background:#1d4ed8}
+/* SYNC */
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
+.sync-dot.synced{background:#16a34a}
+.sync-dot.syncing{background:#d97706;animation:pulse 1s infinite}
+.sync-dot.error{background:#dc2626}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* MODAL ADD/EDIT */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal-box{background:#fff;border-radius:14px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.25)}
-.modal-hdr{padding:20px 24px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;position:sticky;top:0;background:#fff;z-index:1}
+.modal-hdr{padding:20px 24px 16px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
 .modal-title{font-size:16px;font-weight:700;color:#1a1a18}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#6b6b67;padding:4px 8px;border-radius:6px}
 .modal-close:hover{background:#f0efe9}
@@ -66,40 +72,43 @@
 .form-group{display:flex;flex-direction:column;gap:4px}
 .form-group.full{grid-column:1/-1}
 .form-label{font-size:11px;font-weight:600;color:#6b6b67;text-transform:uppercase;letter-spacing:.05em}
-.form-input{padding:9px 12px;border:1.5px solid #e5e5e3;border-radius:8px;font-size:13px;outline:none;font-family:inherit;transition:border .2s;background:#fff}
-.form-input:focus{border-color:#2563EB}
-.form-select{padding:9px 12px;border:1.5px solid #e5e5e3;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;cursor:pointer}
-.form-select:focus{border-color:#2563EB}
+.form-input,.form-select{padding:9px 12px;border:1.5px solid #e5e5e3;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box}
+.form-input:focus,.form-select:focus{border-color:#2563EB}
 .modal-footer{padding:16px 24px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:#fff}
-.btn-save{padding:10px 24px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-save{padding:10px 24px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
 .btn-save:hover{background:#1d4ed8}
 .btn-cancel{padding:10px 20px;background:#f0efe9;color:#1a1a18;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
-.btn-cancel:hover{background:#e5e5e3}
 .btn-delete{padding:10px 20px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:auto}
-.btn-delete:hover{background:#fecaca}
-/* ── ADD BUTTON ── */
-.btn-add-opp{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
-.btn-add-opp:hover{background:#1d4ed8}
-/* ── EDIT ROW BUTTON ── */
-.btn-edit-row{background:none;border:none;cursor:pointer;color:#9b9b96;padding:3px 6px;border-radius:4px;font-size:13px;transition:all .15s}
+.btn-edit-row{background:none;border:none;cursor:pointer;color:#9b9b96;padding:3px 6px;border-radius:4px;font-size:13px}
 .btn-edit-row:hover{background:#f0efe9;color:#2563EB}
-/* ── REP VIEW ── */
+/* REP DASHBOARD */
 .rep-hero{background:linear-gradient(135deg,#1e3a8a,#2563EB);border-radius:12px;padding:24px;color:#fff;margin-bottom:16px}
 .rep-hero-name{font-size:22px;font-weight:700;margin-bottom:4px}
 .rep-hero-sub{font-size:13px;opacity:.75}
 .rep-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
-.rep-metric{background:#fff;border-radius:10px;border:0.5px solid rgba(0,0,0,0.08);padding:14px}
+.rep-metric{background:#fff;border-radius:10px;border:0.5px solid rgba(0,0,0,0.08);padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.rep-metric:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.rep-metric.active{border:2px solid var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
 .rep-metric-lbl{font-size:11px;color:#6b6b67;margin-bottom:4px}
 .rep-metric-val{font-size:20px;font-weight:700;color:#1a1a18}
 .rep-metric-sub{font-size:11px;color:#9b9b96;margin-top:2px}
 .rep-quota-bar-bg{height:8px;background:#f0efe9;border-radius:99px;overflow:hidden;margin-top:8px}
 .rep-quota-bar-fill{height:100%;border-radius:99px;transition:width .8s ease}
-/* ── SYNC STATUS ── */
-.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
-.sync-dot.synced{background:#16a34a}
-.sync-dot.syncing{background:#d97706;animation:pulse 1s infinite}
-.sync-dot.error{background:#dc2626}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* QUOTA DETAIL */
+.quota-detail-panel{background:var(--s2);border-radius:10px;padding:14px;display:none;margin-top:8px}
+.quota-detail-panel.open{display:block}
+.quota-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.quota-detail-item{background:#fff;border-radius:8px;padding:10px;border:0.5px solid var(--border)}
+.quota-detail-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.quota-detail-val{font-size:15px;font-weight:700;color:var(--txt)}
+/* REP TABLE FILTERS */
+.rep-filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.rep-filter-chip{padding:5px 12px;border-radius:99px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--txt2)}
+.rep-filter-chip:hover{border-color:var(--blue);color:var(--blue)}
+.rep-filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.rep-sort-btn{font-size:11px;color:var(--txt3);cursor:pointer;padding:4px 8px;border-radius:6px;background:none;border:none}
+.rep-sort-btn:hover{background:var(--s2);color:var(--txt)}
+.rep-sort-btn.sorted{color:var(--blue);font-weight:600}
 
 #login-screen{position:fixed;inset:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
 .login-box{background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
@@ -246,19 +255,6 @@ tr:last-child td{border-bottom:none}
   .m-grid{grid-template-columns:1fr 1fr}
 }
 
-
-.quota-section{margin-top:16px}
-.quota-rep-row{margin-bottom:14px}
-.quota-rep-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.quota-rep-name{font-size:13px;font-weight:600;color:var(--txt)}
-.quota-rep-nums{font-size:11px;color:var(--txt2);display:flex;gap:12px}
-.quota-rep-nums span{white-space:nowrap}
-.quota-bar-bg{height:10px;background:var(--s2);border-radius:99px;overflow:hidden;border:0.5px solid var(--border)}
-.quota-bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
-.quota-total-row{border-top:0.5px solid var(--border);padding-top:10px;margin-top:6px;display:flex;justify-content:space-between;align-items:center}
-.quota-total-lbl{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
-.quota-total-val{font-size:12px;font-weight:600;color:var(--txt)}
-
 </style>
 </head>
 <body>
@@ -269,137 +265,61 @@ tr:last-child td{border-bottom:none}
     <div class="login-logo">📊</div>
     <div class="login-title">Pipeline 2026</div>
     <div class="login-sub">Ingresa tus credenciales para acceder</div>
-    <input id="login-user" class="login-field" type="text" placeholder="Usuario" autocomplete="username"/>
+    <input id="login-user" class="login-field" type="text" placeholder="Usuario"/>
     <input id="login-pwd" class="login-field" type="password" placeholder="Contraseña"/>
     <button class="login-btn" id="login-btn">Ingresar</button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<!-- MODAL AGREGAR/EDITAR OPORTUNIDAD -->
+<!-- MODAL AGREGAR/EDITAR -->
 <div class="modal-overlay" id="opp-modal">
   <div class="modal-box">
     <div class="modal-hdr">
       <span class="modal-title" id="modal-title">Nueva Oportunidad</span>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button class="modal-close" id="modal-close-btn">×</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">Oportunidad *</label>
-          <input class="form-input" id="f-oportunidad" placeholder="Nombre de la oportunidad"/>
+        <div class="form-group full"><label class="form-label">Oportunidad *</label><input class="form-input" id="f-oportunidad" placeholder="Nombre de la oportunidad"/></div>
+        <div class="form-group full"><label class="form-label">Cuenta / Cliente *</label><input class="form-input" id="f-cuenta" placeholder="Nombre del cliente"/></div>
+        <div class="form-group"><label class="form-label">Rep *</label>
+          <select class="form-select" id="f-rep"><option value="">Seleccionar...</option><option>Clemencia</option><option>Patricia</option><option>Ivan</option><option>Elizabeth</option><option>Santiago</option><option>Lina Londoño</option><option>Adriana Rodríguez</option><option>Adriana Granados</option><option>Thomas</option><option>Johana</option></select>
         </div>
-        <div class="form-group full">
-          <label class="form-label">Cuenta / Cliente *</label>
-          <input class="form-input" id="f-cuenta" placeholder="Nombre del cliente"/>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-select" id="f-estado"><option>Identificado</option><option>En diseño</option><option>Cotizado</option><option>Negociación</option><option>On hold</option><option>Ganado</option><option>Perdido</option><option>abandonado</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Rep *</label>
-          <select class="form-select" id="f-rep">
-            <option value="">Seleccionar...</option>
-            <option>Clemencia</option><option>Patricia</option><option>Ivan</option>
-            <option>Elizabeth</option><option>Santiago</option><option>Lina Londoño</option>
-            <option>Adriana Rodríguez</option><option>Adriana Granados</option>
-            <option>Thomas</option><option>Johana</option>
-          </select>
+        <div class="form-group"><label class="form-label">Valor ($)</label><input class="form-input" id="f-valor" type="number" placeholder="0"/></div>
+        <div class="form-group"><label class="form-label">Probabilidad (%)</label><input class="form-input" id="f-prob" type="number" min="0" max="100" placeholder="50"/></div>
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select class="form-select" id="f-tipo"><option value="">Sin definir</option><option>Venta</option><option>Renta</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Estado</label>
-          <select class="form-select" id="f-estado">
-            <option>Identificado</option><option>En diseño</option><option>Cotizado</option>
-            <option>Negociación</option><option>On hold</option><option>Ganado</option>
-            <option>Perdido</option><option>abandonado</option>
-          </select>
+        <div class="form-group"><label class="form-label">Canal</label>
+          <select class="form-select" id="f-canal"><option value="">Sin definir</option><option>Directo</option><option>Indirecto</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Valor ($)</label>
-          <input class="form-input" id="f-valor" type="number" placeholder="0"/>
+        <div class="form-group"><label class="form-label">Origen</label>
+          <select class="form-select" id="f-origen"><option value="">Sin definir</option><option>Gerencia</option><option>CRM</option><option>Referido Rep</option><option>Broker</option><option>Mercadeo</option><option>Gensler</option><option>Patria</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Probabilidad (%)</label>
-          <input class="form-input" id="f-prob" type="number" min="0" max="100" placeholder="50"/>
+        <div class="form-group"><label class="form-label">Riesgo</label>
+          <select class="form-select" id="f-riesgo"><option value="">Sin definir</option><option>bajo</option><option>Medio</option><option>Alto</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Tipo</label>
-          <select class="form-select" id="f-tipo">
-            <option value="">Sin definir</option><option>Venta</option><option>Renta</option>
-          </select>
+        <div class="form-group"><label class="form-label">Mes Inicio</label>
+          <select class="form-select" id="f-mes_inicio"><option value="">-</option><option>enero</option><option>febrero</option><option>marzo</option><option>abril</option><option>mayo</option><option>junio</option><option>julio</option><option>agosto</option><option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Canal</label>
-          <select class="form-select" id="f-canal">
-            <option value="">Sin definir</option><option>Directo</option><option>Indirecto</option>
-          </select>
+        <div class="form-group"><label class="form-label">Mes Radicación</label>
+          <select class="form-select" id="f-mes_radicacion"><option value="">-</option><option>Definir</option><option>enero</option><option>febrero</option><option>marzo</option><option>abril</option><option>mayo</option><option>junio</option><option>julio</option><option>agosto</option><option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Origen</label>
-          <select class="form-select" id="f-origen">
-            <option value="">Sin definir</option><option>Gerencia</option><option>CRM</option>
-            <option>Referido Rep</option><option>Broker</option><option>Mercadeo</option>
-            <option>Gensler</option><option>Patria</option><option>Terranum</option>
-          </select>
+        <div class="form-group"><label class="form-label">Broker</label><input class="form-input" id="f-broker" placeholder="Nombre del broker"/></div>
+        <div class="form-group"><label class="form-label">Motivo Pérdida</label>
+          <select class="form-select" id="f-motivo_perdida"><option value=""></option><option>Precio</option><option>Producto</option><option>Diseño</option><option>Otra area</option><option>tiempos</option><option>Garantia</option><option>Otros</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Segmento</label>
-          <select class="form-select" id="f-segmento">
-            <option value="">Sin definir</option><option>Corp</option><option>Retail</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Ciudad</label>
-          <select class="form-select" id="f-ciudad">
-            <option value="">Sin definir</option><option>Bogotá</option><option>Medellín</option>
-            <option>Cali</option><option>Barranquilla</option><option>Armenia</option>
-            <option>Guajira</option><option>Choachi</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Riesgo</label>
-          <select class="form-select" id="f-riesgo">
-            <option value="">Sin definir</option><option>bajo</option><option>Medio</option><option>Alto</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mes de Inicio</label>
-          <select class="form-select" id="f-mes_inicio">
-            <option value="">Sin definir</option>
-            <option>enero</option><option>febrero</option><option>marzo</option><option>abril</option>
-            <option>mayo</option><option>junio</option><option>julio</option><option>agosto</option>
-            <option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mes de Radicación</label>
-          <select class="form-select" id="f-mes_radicacion">
-            <option value="">Sin definir</option><option>Definir</option>
-            <option>enero</option><option>febrero</option><option>marzo</option><option>abril</option>
-            <option>mayo</option><option>junio</option><option>julio</option><option>agosto</option>
-            <option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Broker</label>
-          <input class="form-input" id="f-broker" placeholder="Nombre del broker"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Motivo Pérdida</label>
-          <select class="form-select" id="f-motivo_perdida">
-            <option value=""></option><option>Precio</option><option>Producto</option>
-            <option>Diseño</option><option>Otra area</option><option>tiempos</option>
-            <option>Garantia</option><option>Estudio de mercado</option>
-            <option>Se cancelo el proyecto</option><option>Otros</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Comentarios</label>
-          <input class="form-input" id="f-comentarios" placeholder="Notas adicionales"/>
-        </div>
+        <div class="form-group full"><label class="form-label">Comentarios</label><input class="form-input" id="f-comentarios" placeholder="Notas adicionales"/></div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-delete" id="btn-delete-opp" style="display:none" onclick="deleteOpp()">🗑 Eliminar</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveOpp()">💾 Guardar</button>
+      <button class="btn-delete" id="btn-delete-opp" style="display:none">🗑 Eliminar</button>
+      <button class="btn-cancel" id="modal-cancel-btn">Cancelar</button>
+      <button class="btn-save" id="modal-save-btn">💾 Guardar</button>
     </div>
   </div>
 </div>
@@ -463,22 +383,6 @@ tr:last-child td{border-bottom:none}
   <div class="g2" style="margin-bottom:16px">
     <div class="card">
       <div id="mg-replist"></div>
-<!-- quota-progress-section -->
-<style>
-.quota-section{margin-top:16px}
-.quota-rep-row{margin-bottom:14px}
-.quota-rep-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.quota-rep-name{font-size:13px;font-weight:600;color:var(--txt)}
-.quota-rep-nums{font-size:11px;color:var(--txt2);display:flex;gap:12px}
-.quota-rep-nums span{white-space:nowrap}
-.quota-bar-bg{height:10px;background:var(--s2);border-radius:99px;overflow:hidden;border:0.5px solid var(--border)}
-.quota-bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
-.quota-total-row{border-top:0.5px solid var(--border);padding-top:10px;margin-top:6px;display:flex;justify-content:space-between;align-items:center}
-.quota-total-lbl{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
-.quota-total-val{font-size:12px;font-weight:600;color:var(--txt)}
-</style>
-<div class="quota-section" id="quota-progress-block"></div>
-<!-- quota-render-script moved below data definitions -->
     </div>
     <div class="card">
       <p class="section-lbl">Distribución por rep</p>
@@ -571,420 +475,524 @@ tr:last-child td{border-bottom:none}
 
 
 <script>
-// ══════════════════════════════════════════════
-// USUARIOS Y ROLES
-// ══════════════════════════════════════════════
-const USERS = {
-  'Gerencia':   {pwd:'Famoc2026.',    role:'gerencia', rep:null},
-  'Clemencia':  {pwd:'Clemencia26',   role:'rep',      rep:'Clemencia'},
-  'Patricia':   {pwd:'Patricia26',    role:'rep',      rep:'Patricia'},
-  'Ivan':       {pwd:'Ivan26',        role:'rep',      rep:'Ivan'},
-  'Elizabeth':  {pwd:'Elizabeth26',   role:'rep',      rep:'Elizabeth'},
-  'Santiago':   {pwd:'Santiago26',    role:'rep',      rep:'Santiago'},
-  'Lina Londoño':{pwd:'Lina26',       role:'rep',      rep:'Lina Londoño'},
-  'Adriana':    {pwd:'Adriana26',     role:'rep',      rep:null}, // Both Adrianas
-  'Thomas':     {pwd:'Thomas26',      role:'rep',      rep:'Thomas'},
-  'Johana':     {pwd:'Johana26',      role:'rep',      rep:'Johana'},
-};
+// ═══════════════════════════════════════════════════════════
+// USUARIOS
+// ═══════════════════════════════════════════════════════════
+var RAW = []; // Respaldo local: los datos reales siempre vienen de Firebase (colección "deals")
+var USERS = {"Gerencia": {"pwd": "Famoc2026.", "role": "gerencia"}, "Clemencia": {"pwd": "Clemencia26", "role": "rep"}, "Patricia": {"pwd": "Patricia26", "role": "rep"}, "Ivan": {"pwd": "Ivan26", "role": "rep"}, "Elizabeth": {"pwd": "Elizabeth26", "role": "rep"}, "Santiago": {"pwd": "Santiago26", "role": "rep"}, "Lina Londoño": {"pwd": "Lina26", "role": "rep"}, "Adriana Rodríguez": {"pwd": "AdrianaR26", "role": "rep"}, "Adriana Granados": {"pwd": "AdrianaG26", "role": "rep"}, "Thomas": {"pwd": "Thomas26", "role": "rep"}, "Johana": {"pwd": "Johana26", "role": "rep"}};
+var currentUser = null, currentRole = null, currentRep = null;
 
-let currentUser = null;
-let currentRole = null;
-let currentRep  = null;
-
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // LOGIN
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function attemptLogin(){
-  const user = document.getElementById('login-user').value.trim();
-  const pwd  = document.getElementById('login-pwd').value;
-  const u    = USERS[user];
+  var user = document.getElementById('login-user').value.trim();
+  var pwd  = document.getElementById('login-pwd').value;
+  var u    = USERS[user];
   if(u && u.pwd === pwd){
     currentUser = user;
     currentRole = u.role;
-    currentRep  = u.rep || user;
+    currentRep  = (u.role === 'rep') ? user : null;
     sessionStorage.setItem('pl_user', user);
-    sessionStorage.setItem('pl_role', currentRole);
-    sessionStorage.setItem('pl_rep',  currentRep);
-    document.getElementById('login-screen').style.display='none';
+    sessionStorage.setItem('pl_role', u.role);
+    document.getElementById('login-screen').style.display = 'none';
     initApp();
   } else {
     document.getElementById('login-error').textContent = 'Usuario o contraseña incorrectos.';
     document.getElementById('login-pwd').value = '';
-    document.getElementById('login-pwd').focus();
   }
 }
-
-function logout(){
-  sessionStorage.clear();
-  location.reload();
-}
+function logout(){ sessionStorage.clear(); location.reload(); }
 
 document.addEventListener('DOMContentLoaded', function(){
-  // Check session
-  const saved = sessionStorage.getItem('pl_user');
+  var saved = sessionStorage.getItem('pl_user');
   if(saved && USERS[saved]){
     currentUser = saved;
     currentRole = sessionStorage.getItem('pl_role');
-    currentRep  = sessionStorage.getItem('pl_rep');
-    document.getElementById('login-screen').style.display='none';
+    currentRep  = (currentRole === 'rep') ? saved : null;
+    document.getElementById('login-screen').style.display = 'none';
     initApp();
   } else {
-    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('login-screen').style.display = 'flex';
   }
   document.getElementById('login-btn').addEventListener('click', attemptLogin);
-  document.getElementById('login-pwd').addEventListener('keydown', e=>{ if(e.key==='Enter') attemptLogin(); });
-  document.getElementById('login-user').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-pwd').focus(); });
+  document.getElementById('login-pwd').addEventListener('keydown', function(e){ if(e.key==='Enter') attemptLogin(); });
+  document.getElementById('login-user').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('login-pwd').focus(); });
 });
 
-// ══════════════════════════════════════════════
-// NAV — inject user badge + add button
-// ══════════════════════════════════════════════
-function renderNavUser(){
-  const navRight = document.querySelector('.nav-right');
-  if(!navRight) return;
-  const initials = currentUser.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const roleLabel = currentRole==='gerencia'?'Gerencia':'Rep';
-  const roleClass = currentRole==='gerencia'?'role-gerencia':'role-rep';
-  navRight.innerHTML = `
-    <span id="sync-status" style="font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center">
-      <span class="sync-dot synced" id="sync-dot"></span>Sincronizado
-    </span>
-    <button class="btn-add-opp" onclick="openModal()">＋ Agregar</button>
-    <div class="user-badge">
-      <div class="user-avatar">${initials}</div>
-      <span class="user-name">${currentUser}</span>
-      <span class="user-role-badge ${roleClass}">${roleLabel}</span>
-    </div>
-    <button class="btn-logout" onclick="logout()">Salir</button>
-  `;
-}
+// ═══════════════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════════════
+var liveDeals = [];
+var _editingKey = null;
 
-// ══════════════════════════════════════════════
-// FIREBASE DATA LAYER
-// ══════════════════════════════════════════════
-const RAW_SEED = [{"oportunidad":"Seaboard","cuenta":"Seaboard","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":1300000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otra area","tipo":"Renta"},{"oportunidad":"Remodelacion Biblioteca","cuenta":"U. San Buenaventura","rep":"Ivan","estado":"Ganado","estado2":"Cerrado","valor":622500000,"prob":1.0,"esperado":622500000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"diciembre","mes_radicacion":"diciembre","anio_radicacion":2025,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arbo / Sanofi","cuenta":"Sanofi","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":6445740,"prob":0.5,"esperado":3222870,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"febrero","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arbo / Sanofi 2","cuenta":"Sanofi","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":5651625,"prob":0.5,"esperado":2825812,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"febrero","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Remodelacion calle 137","cuenta":"Sura","rep":"Ivan","estado":"Ganado","estado2":"Cerrado","valor":1373000000,"prob":1.0,"esperado":1373000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"noviembre","mes_radicacion":"diciembre","anio_radicacion":2025,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Meli Bogota","cuenta":"Meli","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":1700000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Medellín","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Producto","tipo":"Venta"},{"oportunidad":"Seguros Mundial - Cali","cuenta":"Seguros Mundial","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":615000000,"prob":1.0,"esperado":615000000,"canal":"Indirecto","origen":"Broker","broker":"Fonegra Gerlein","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Lockers y Biblioteca","cuenta":"Petrobras","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":23760000,"prob":0.5,"esperado":11880000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mazda","cuenta":"Mada","rep":"Elizabeth","estado":"Perdido","estado2":"Cerrado","valor":2200000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Diseño","tipo":"Venta"},{"oportunidad":"Maple Media","cuenta":"Arrise","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":9974000,"prob":0.5,"esperado":4987000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"febrero","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Telefonica","cuenta":"Telefonica","rep":"Elizabeth","estado":"Perdido","estado2":"Cerrado","valor":911217000,"prob":0.5,"esperado":455608500,"canal":"Indirecto","origen":"Broker","broker":"CBRE","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"septiembre","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Onnet","cuenta":"Onnet","rep":"Elizabeth","estado":"Negociación","estado2":"Abierto","valor":3600000000,"prob":0.7,"esperado":2520000000,"canal":"Indirecto","origen":"Broker","broker":"CBRE","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"septiembre","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Mobiliario para Oficina","cuenta":"PFS Estructuras","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":12826000,"prob":0.3,"esperado":3847800,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario multiples sedes","cuenta":"Banco Pichincha","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":1440000000,"prob":0.1,"esperado":144000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario oficina","cuenta":"Enzo Arquitectura","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":12490000,"prob":0.3,"esperado":3747000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario oficina","cuenta":"PFS Estructuras","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":12500000,"prob":0.1,"esperado":1250000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario oficina","cuenta":"Enzo Arquitectura","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":12500000,"prob":0.1,"esperado":1250000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Adecuaciones electricas oficinas","cuenta":"Conconcreto","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":770000000,"prob":0.1,"esperado":77000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Colcapital","cuenta":"Cocapital","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":300000000,"prob":0.5,"esperado":150000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Seguros Mundial Fachada","cuenta":"Seguros Mundial","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":17112990,"prob":1.0,"esperado":17112990,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Omega","cuenta":"Omga","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":15000000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Ban100 Santa Marta","cuenta":"Ban100","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":63000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Mercadeo","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ban100 Manizales","cuenta":"Ban100","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":57000000,"prob":1.0,"esperado":57000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"junio","mes_radicacion":"mayo","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ban100 Armenia","cuenta":"Ban100","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":43000000,"prob":1.0,"esperado":43000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Oficinas y mobiliario Ongcvidesh","cuenta":"Ongcvidesh","rep":"Clemencia","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Ban100 Bogota","cuenta":"Ban100","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":6500000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ban100 sillas","cuenta":"Ban100","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":51677000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2024,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Ban100 Medellin - Mobiliario","cuenta":"Ban100","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":46600000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2024,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Sunshine Bouquet","cuenta":"Sunshine Boutique","rep":"Clemencia","estado":"On hold","estado2":"Abierto","valor":1400000000,"prob":0.1,"esperado":140000000,"canal":"Indirecto","origen":"Broker","broker":"CBRE","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Nexa BPO","cuenta":"Nexa","rep":"Elizabeth","estado":"Cotizado","estado2":"Abierto","valor":314000000,"prob":0.2,"esperado":62800000,"canal":"Indirecto","origen":"Patria","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"alto","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Indra","cuenta":"Indra","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":1000000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Engel & Volkers","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Seguros Bolivar calle 72","cuenta":"Seguros Bolivar","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":1300000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Seguros Bolivar Sura calle 26","cuenta":"Seguros Bolivar","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":1200000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Seguros Bolivar Bogota - mesas","cuenta":"Seguros Bolivar","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":32000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Seguros Bolivar - Centros Medicos","cuenta":"Seguros Bolivar","rep":"Clemencia","estado":"On hold","estado2":"Abierto","valor":100000000,"prob":0.1,"esperado":10000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Colegio Hontanar - Pupitres y escritorios","cuenta":"Colegio Hontanar","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":80000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Colegio Hontanar - Muebles adicionales","cuenta":"Colegio Hontanar","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":7000000,"prob":1.0,"esperado":7000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"mayo","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Geida - Puestos de trabajo","cuenta":"Geida","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":100000000,"prob":0.5,"esperado":50000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Banco de la republica - Cali","cuenta":"Banco de la republica","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":201667284,"prob":0.5,"esperado":100833642,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Banco de la republica","cuenta":"Banco de la republica","rep":"Clemencia","estado":"Identificado","estado2":"Abierto","valor":3000000000,"prob":0.5,"esperado":1500000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Urban 165 - Contigo","cuenta":"Urban 165","rep":"Clemencia","estado":"abandonado","estado2":"Cerrado","valor":700000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Finandina calle 72","cuenta":"Finandina","rep":"Clemencia","estado":"On hold","estado2":"Abierto","valor":55000000,"prob":0.5,"esperado":27500000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Colegio Jose Max Leon","cuenta":"Colegio Jose Max Leon","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":65000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Artrex","cuenta":"Arrex","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":750000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Otra area","tipo":"Venta"},{"oportunidad":"Meli Medellin","cuenta":"Meli","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":1500000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Producto","tipo":"Venta"},{"oportunidad":"Stoll Tank","cuenta":"Stoll Tank","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":194000000,"prob":0.5,"esperado":97000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Noviembre","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Sillas","cuenta":"Sudameris","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":245150618,"prob":0.3,"esperado":73545185,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"diciembre","mes_radicacion":"octubre","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario oficina","cuenta":"Sudameris","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":632500000,"prob":0.6,"esperado":379500000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"diciembre","mes_radicacion":"octubre","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ocesa - Ticket Master","cuenta":"Ocesa","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":954568801,"prob":1.0,"esperado":954568801,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Atrio","cuenta":"Atrio","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":9600000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"feb","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otra area","tipo":"renta"},{"oportunidad":"Jazmin Mateus","cuenta":"Jazmin Mateus","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":27300000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Edwin Serrato","cuenta":"Edwin Serrato","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":4500000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Laboratorio","cuenta":"U. San Buenaventura","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":170000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Hormigon Reforzado - Top Golf","cuenta":"Hormigon Reforzado - Top Golf","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":1300000000,"prob":0.1,"esperado":130000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Bechara & Asociados S.A.S.","cuenta":"Bechara & Asociados S.A","rep":"Ivan","estado":"abandonado","estado2":"Cerrado","valor":10987605,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"recepcion Edificio","cuenta":"Edificio Porvenir","rep":"Ivan","estado":"Ganado","estado2":"Cerrado","valor":1407000,"prob":1.0,"esperado":1407000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Laboratorios Provet S.A.S. - Retapizado","cuenta":"Laboratorios Provet S.A","rep":"Ivan","estado":"Ganado","estado2":"Cerrado","valor":3459836,"prob":1.0,"esperado":3459836,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario Computo","cuenta":"U. Cooperativa de Colombia","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":80000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Puestos de trabajo","cuenta":"EASYCONCEPT","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":23900000,"prob":0.1,"esperado":2390000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Archivadores","cuenta":"Sevifuturo","rep":"Ivan","estado":"abandonado","estado2":"Cerrado","valor":3500000,"prob":0.1,"esperado":350000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Innova Schools - Luisa Fernanda Peña","cuenta":"Innova Schools","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":1000000000,"prob":0.2,"esperado":200000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Diverplaza - Plazoleta","cuenta":"Diverplaza","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":3631190154,"prob":0.1,"esperado":363119015,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Sillas y mesas Cali","cuenta":"Coomeva","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":52469360,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Puestos de trabajo Medellin","cuenta":"Coomeva Medicina Prepagada","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":78000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mesas y sillas Wework","cuenta":"Emprendum","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":55843000,"prob":0.3,"esperado":16752900,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario nuevo","cuenta":"Marped Group S.A.S.","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":35600000,"prob":0.3,"esperado":10680000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario restaurante","cuenta":"U Pedagogica","rep":"Ivan","estado":"abandonado","estado2":"Cerrado","valor":270000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Producto","tipo":"Venta"},{"oportunidad":"Mobiliario oficina","cuenta":"Contructora y servicios MR","rep":"Ivan","estado":"abandonado","estado2":"Cerrado","valor":42500000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Estudio de mercado","tipo":"Venta"},{"oportunidad":"Puestos de trabajo y mesas","cuenta":"U Fucs","rep":"Ivan","estado":"Perdido","estado2":"Cerrado","valor":336000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"EXL Service Phone Boots","cuenta":"EXL","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":150000000,"prob":0.5,"esperado":75000000,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"EXL Adecuacion parqueaderos","cuenta":"EXL","rep":"","estado":"","estado2":"Abierto","valor":0,"prob":0,"esperado":0,"canal":"","origen":"","broker":"","segmento":"","ciudad":"","anio_inicio":0,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"","tipo":""},{"oportunidad":"EXL nueva sede","cuenta":"EXL","rep":"Clemencia","estado":"Identificado","estado2":"Abierto","valor":3700000000,"prob":0.3,"esperado":1110000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arreglo poseta","cuenta":"EXL","rep":"Clemencia","estado":"abandonado","estado2":"Cerrado","valor":16089491,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"Garantia","tipo":"Venta"},{"oportunidad":"EXL Service Muro en sede area operativa","cuenta":"EXL","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":48547042,"prob":1.0,"esperado":48547042,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Katherine Villamizar","cuenta":"Katherine Villamizar","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":7000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Construcciones planificadas - Mobiliario","cuenta":"Aval fiduciaria","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":1057091764,"prob":0.3,"esperado":317127529,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"EXL IT","cuenta":"EXL","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":22000000,"prob":1.0,"esperado":22000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"mayo","anio_radicacion":2026,"riesgo":"","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"U Bosque - Sillas","cuenta":"U Bosque","rep":"Elizabeth","estado":"Cotizado","estado2":"Abierto","valor":72029000,"prob":0.3,"esperado":21608700,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Brinsa - Lockers","cuenta":"Brinsa - Coninsa","rep":"Elizabeth","estado":"Ganado","estado2":"Cerrado","valor":340000000,"prob":1.0,"esperado":340000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Hornitos - Mobiliario de linea","cuenta":"Honitos","rep":"Elizabeth","estado":"Cotizado","estado2":"Abierto","valor":7000000,"prob":0.5,"esperado":3500000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Unir calle 100 - movimiento","cuenta":"U. Int. Rioja","rep":"Elizabeth","estado":"Perdido","estado2":"Cerrado","valor":23000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"","anio_radicacion":0,"riesgo":"medio","motivo_perdida":"Se cancelo el proyecto","tipo":"Venta"},{"oportunidad":"Unir calle 103 -Obra civil - reubicacion mobiliario","cuenta":"U. Int. Rioja","rep":"Elizabeth","estado":"Identificado","estado2":"Abierto","valor":400000000,"prob":0.4,"esperado":160000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"QBCO Oficinas nuevas - Medellin","cuenta":"QBCO","rep":"Elizabeth","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Terranum BTS 5 y 6","cuenta":"Terranum","rep":"Elizabeth","estado":"abandonado","estado2":"Cerrado","valor":34000000,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Terranum","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Yanbal poltronas","cuenta":"Yanbal","rep":"Elizabeth","estado":"Ganado","estado2":"Cerrado","valor":47373826,"prob":0.5,"esperado":23686913,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Yanbal Joyeria","cuenta":"Yanbal","rep":"Elizabeth","estado":"On hold","estado2":"Abierto","valor":250000000,"prob":0.2,"esperado":50000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Yanbal laboratorio","cuenta":"Yanbal","rep":"Elizabeth","estado":"On hold","estado2":"Abierto","valor":150000000,"prob":0.2,"esperado":30000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Marriot Pereira - mesas para auditorio","cuenta":"Zobrio","rep":"Elizabeth","estado":"Cotizado","estado2":"Abierto","valor":35000000,"prob":0.1,"esperado":3500000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ebisu","cuenta":"Constructora Ebisu","rep":"Elizabeth","estado":"Ganado","estado2":"Cerrado","valor":31673487,"prob":1.0,"esperado":31673487,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Aparta suits","cuenta":"Aparta suits","rep":"Elizabeth","estado":"Identificado","estado2":"Abierto","valor":75000000,"prob":0.5,"esperado":37500000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Club Los Arrayanes","cuenta":"Club Los Arrayanes","rep":"Elizabeth","estado":"abandonado","estado2":"Cerrado","valor":5000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Darío Daniel Morales Herrera","cuenta":"Darío Daniel Morales","rep":"Elizabeth","estado":"abandonado","estado2":"Cerrado","valor":243000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"SILLAS REF. CHICAGO","cuenta":"U. Int. Rioja","rep":"Elizabeth","estado":"Ganado","estado2":"Cerrado","valor":37257126,"prob":1.0,"esperado":37257126,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"mayo","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Unir sillas","cuenta":"U. Int. Rioja","rep":"Elizabeth","estado":"Cotizado","estado2":"Abierto","valor":80000000,"prob":0.7,"esperado":56000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Empresa de acueducto y alcantarillado","cuenta":"Empresa de acueducto y alcantarillado","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":133000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"1 locker - Arrise","cuenta":"Arrise","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":1920000,"prob":1.0,"esperado":1920000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arrise muebles café 40 unidades","cuenta":"Arrise","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":115684000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"","anio_radicacion":0,"riesgo":"bajo","motivo_perdida":"tiempos","tipo":"Venta"},{"oportunidad":"Ocesa - Vive Claro - Puestos de trabajo - Mobiliario y obra","cuenta":"Ocesa","rep":"Patricia","estado":"Identificado","estado2":"Abierto","valor":322700000,"prob":0.1,"esperado":32270000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Estructuras inmobiliarias - Torre Krystal","cuenta":"Estructuras inmobiliarias","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":340000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"Ocesa - porvenir piso 2","cuenta":"Ocesa","rep":"Patricia","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":""},{"oportunidad":"Adama","cuenta":"Adama","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":803000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"tiempos","tipo":"Venta"},{"oportunidad":"Levapan","cuenta":"Levapan","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":810000000,"prob":0.2,"esperado":162000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Plata","cuenta":"Plata","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":60000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"Diverplaza - Columnas","cuenta":"Diverplaza","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":8347520,"prob":0.1,"esperado":834752,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Diverplaza - Rampa","cuenta":"Diverplaza","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":399672000,"prob":0.1,"esperado":39967200,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Diverplaza - Baños","cuenta":"Diverplaza","rep":"Ivan","estado":"Cotizado","estado2":"Abierto","valor":307258704,"prob":0.1,"esperado":30725870,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Al Origen","cuenta":"Al origen","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":907000000,"prob":0.3,"esperado":272100000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"enero","anio_radicacion":2027,"riesgo":"medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"ISARCO-USAQUEN PLAZA","cuenta":"Isarco","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":95443221,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Isarco","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"MDV","cuenta":"MDV","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":128524013,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"Gensler / Corferias","cuenta":"Corferias","rep":"Patricia","estado":"Identificado","estado2":"Abierto","valor":3967000000,"prob":0.2,"esperado":793400000,"canal":"Directo","origen":"Gensler","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Trafigura","cuenta":"Trafigura","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":1016000000,"prob":0.1,"esperado":101600000,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"febrero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"IJM","cuenta":"IJM","rep":"Johana","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Interapidisimo","cuenta":"Interapidisimo","rep":"Santiago","estado":"Identificado","estado2":"Abierto","valor":1800000000,"prob":0.5,"esperado":900000000,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario oficina - Obra civil","cuenta":"SYAC","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Omnitempus - Reubicacion + Obra piso 2 al 4","cuenta":"Omnitempus","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":291000000,"prob":0.5,"esperado":145500000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"enero","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Omnitempus - Reubicacion + Obra piso 1","cuenta":"Omnitempus","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":179000000,"prob":0.5,"esperado":89500000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2025,"mes_inicio":"enero","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Carcel en la Guajira","cuenta":"Consorcio Eron","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":1600000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario especial","cuenta":"V&G Constructora","rep":"Patricia","estado":"abandonado","estado2":"Cerrado","valor":51685000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arturo Calle","cuenta":"Arturo Calle","rep":"Patricia","estado":"Perdido","estado2":"Cerrado","valor":215200000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Claro","cuenta":"Claro","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":4150000000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Discordoba Barranquilla","cuenta":"Discordoba","rep":"Lina Londoño","estado":"En diseño","estado2":"Abierto","valor":540000000,"prob":0.5,"esperado":270000000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Discordoba Medellín","cuenta":"Discordoba","rep":"Adriana Rodríguez","estado":"En diseño","estado2":"Abierto","valor":540000000,"prob":0.5,"esperado":270000000,"canal":"Directo","origen":"CRM","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"abril","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Nomad Cabrera - locales","cuenta":"Nomad Cabrera","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":2237763222,"prob":0.1,"esperado":223776322,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"enero","anio_radicacion":2028,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Tul","cuenta":"Tul","rep":"Adriana Granados","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Café Chitú","cuenta":"Café Chitu","rep":"Adriana Granados","estado":"abandonado","estado2":"Cerrado","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"Otros","tipo":"Venta"},{"oportunidad":"Goyurt -  Islas","cuenta":"Goyurt","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":166544810,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"tiempos","tipo":"Venta"},{"oportunidad":"Goyurt - Calle 90","cuenta":"Goyurt","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"tiempos","tipo":"Venta"},{"oportunidad":"Goyurt -  Plaza imperial","cuenta":"Goyurt","rep":"Clemencia","estado":"Perdido","estado2":"Cerrado","valor":107845446,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"tiempos","tipo":"Venta"},{"oportunidad":"La Parla","cuenta":"La Parla","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":1249000000,"prob":0.1,"esperado":124900000,"canal":"Indirecto","origen":"Broker","broker":"Isarco","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Sala de ventas - Carpinteria","cuenta":"E- Concept","rep":"Patricia","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0.5,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Central Apartamentos","cuenta":"Central Apartamentos","rep":"Elizabeth","estado":"En diseño","estado2":"Abierto","valor":0,"prob":0.0,"esperado":0,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Renta"},{"oportunidad":"Hotel AC Marriot","cuenta":"Marriot Armenia","rep":"Clemencia","estado":"Identificado","estado2":"Abierto","valor":3131134000,"prob":0.1,"esperado":313113400,"canal":"Indirecto","origen":"Broker","broker":"Jll","segmento":"Retail","ciudad":"Armenia","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"Definir","anio_radicacion":2028,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"colaborativos especiales - Cali","cuenta":"Ban100","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":22685920,"prob":0.5,"esperado":11342960,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Cali","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"colaborativos especiales Medellin","cuenta":"Ban100","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":19406120,"prob":0.5,"esperado":9703060,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Medellín","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":0,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"obra civil - Cerramiento","cuenta":"merizalde","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":22812000,"prob":0.1,"esperado":2281200,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"mobiliario linea adicionales Armenia","cuenta":"Ban100","rep":"Clemencia","estado":"Ganado","estado2":"Cerrado","valor":1852100,"prob":1.0,"esperado":1852100,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"mobiliario especial - mesas","cuenta":"Colegio Hontanar","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":36951200,"prob":0.5,"esperado":18475600,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"mobiliario linea - Oficinas","cuenta":"Colegio Hontanar","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":13098380,"prob":0.5,"esperado":6549190,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"venta"},{"oportunidad":"mobiliario especial - Centro Medico","cuenta":"Zonata","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":1382981000,"prob":0.2,"esperado":276596200,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Armenia","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":2028,"riesgo":"Medio","motivo_perdida":"","tipo":"renta"},{"oportunidad":"mobiliario","cuenta":"QUORA","rep":"Clemencia","estado":"","estado2":"Abierto","valor":0,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Gerencia","broker":"","segmento":"Retail","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"","anio_radicacion":0,"riesgo":"","motivo_perdida":"","tipo":""},{"oportunidad":"Oficinas y mobiliario","cuenta":"Merz Colombia","rep":"Elizabeth","estado":"Identificado","estado2":"Abierto","valor":1600000000,"prob":0.6,"esperado":960000000,"canal":"Indirecto","origen":"Broker","broker":"MTS","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"agosto","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Obra Civil Fibra optica","cuenta":"EXL","rep":"Clemencia","estado":"Cotizado","estado2":"Abierto","valor":95000000,"prob":0.4,"esperado":38000000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Ipanema","cuenta":"Ipanema","rep":"Thomas","estado":"Perdido","estado2":"Cerrado","valor":57494306,"prob":0.0,"esperado":0,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Retail","ciudad":"Barranquilla","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"alto","motivo_perdida":"Precio","tipo":"Venta"},{"oportunidad":"Fernando Suarez","cuenta":"Andina Brokers","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":534158083,"prob":0.5,"esperado":267079041,"canal":"Indirecto","origen":"Broker","broker":"Andina Brokers","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Worley - Isarco","cuenta":"Worley","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":13500000,"prob":0.3,"esperado":4050000,"canal":"Indirecto","origen":"Broker","broker":"Isarco","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Arreglos barra restaurante","cuenta":"Huawai","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":37200000,"prob":0.2,"esperado":7440000,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":""},{"oportunidad":"Puestos de trabajo 8","cuenta":"Corpodisa","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":14634000,"prob":0.0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Corp","ciudad":"Guajira","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"Definir","anio_radicacion":2026,"riesgo":"medio","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Mobiliario punto de venta","cuenta":"Loto","rep":"Elizabeth","estado":"Identificado","estado2":"Abierto","valor":0,"prob":0,"esperado":0,"canal":"Directo","origen":"CRM","broker":"","segmento":"Retail","ciudad":"Choachi","anio_inicio":2026,"mes_inicio":"Mayo","mes_radicacion":"","anio_radicacion":0,"riesgo":"Alto","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Techgrow Inversiones - Biblioteca+ puestos","cuenta":"TechGrow","rep":"Patricia","estado":"Ganado","estado2":"Cerrado","valor":4472205,"prob":1.0,"esperado":4472205,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"junio","mes_radicacion":"junio","anio_radicacion":2026,"riesgo":"bajo","motivo_perdida":"","tipo":"Venta"},{"oportunidad":"Biolev - Obra y Mobiliario especial","cuenta":"Levapan","rep":"Patricia","estado":"Cotizado","estado2":"Abierto","valor":133032510,"prob":0.2,"esperado":26606502,"canal":"Directo","origen":"Referido Rep","broker":"","segmento":"Corp","ciudad":"Bogotá","anio_inicio":2026,"mes_inicio":"marzo","mes_radicacion":"julio","anio_radicacion":2026,"riesgo":"Medio","motivo_perdida":"","tipo":"Venta"}];
-
-// Inicializar con datos locales para render inmediato mientras Firebase carga
-let liveDeals = RAW_SEED.map((d,i) => ({...d, _key:'seed_'+i}));
-let _editingKey = null;
-
-function setSyncStatus(status){
-  const dot = document.getElementById('sync-dot');
-  const txt = document.getElementById('sync-status');
-  if(!dot || !txt) return;
-  if(status==='syncing'){dot.className='sync-dot syncing'; txt.lastChild.textContent='Guardando...';}
-  else if(status==='synced'){dot.className='sync-dot synced'; txt.lastChild.textContent='Sincronizado';}
-  else{dot.className='sync-dot error'; txt.lastChild.textContent='Error';}
+function setSyncStatus(s){
+  var dot = document.getElementById('sync-dot');
+  var lbl = document.getElementById('sync-lbl');
+  if(!dot) return;
+  if(s==='syncing'){ dot.className='sync-dot syncing'; if(lbl) lbl.textContent='Guardando...'; }
+  else if(s==='synced'){ dot.className='sync-dot synced'; if(lbl) lbl.textContent='Sincronizado'; }
+  else { dot.className='sync-dot error'; if(lbl) lbl.textContent='Error'; }
 }
 
 function initFirebase(){
   function doInit(){
-    const db = window._db;
-    const dbRef = window._dbRef;
-    const dbOnValue = window._dbOnValue;
-    const dealsRef = dbRef(db, 'deals');
-
-    // Seed if empty
-    dbOnValue(dealsRef, (snapshot) => {
-      const data = snapshot.val();
+    var db=window._db, dbRef=window._dbRef, dbOnValue=window._dbOnValue;
+    var dealsRef = dbRef(db,'deals');
+    dbOnValue(dealsRef, function(snapshot){
+      var data = snapshot.val();
       if(!data){
-        // First time: seed with RAW data
-        const batch = {};
-        RAW_SEED.forEach((d,i) => { batch['deal_'+String(i).padStart(4,'0')] = d; });
-        window._dbSet(dealsRef, batch).then(()=>console.log('Seeded Firebase'));
+        var batch = {};
+        RAW.forEach(function(d,i){ batch['deal_'+String(i).padStart(4,'0')] = d; });
+        window._dbSet(dealsRef, batch);
       } else {
-        // Convert object to array with keys
-        liveDeals = Object.entries(data).map(([k,v])=>({...v, _key:k}));
-        // Refresh dashboard with live data
-        refreshDashboard();
+        liveDeals = Object.entries(data).map(function(e){ return Object.assign({}, e[1], {_key:e[0]}); });
+        window._liveData = liveDeals;
+        applyFilters();
+        if(currentRole==='rep'){ renderRepView(); renderRepTable(); }
         setSyncStatus('synced');
       }
     });
   }
-
   if(window._firebaseReady){ doInit(); }
   else { window.addEventListener('firebase-ready', doInit); }
 }
 
-function refreshDashboard(){
-  window._liveData = liveDeals;
-  applyFilters();
-  if(currentRole === 'rep'){
-    renderRepView();
-    renderRepTable();
-  }
-}
-
-// ══════════════════════════════════════════════
-// MODAL — AGREGAR / EDITAR
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// MODAL ADD/EDIT
+// ═══════════════════════════════════════════════════════════
 function openModal(deal){
-  _editingKey = deal?._key || null;
-  const modal = document.getElementById('opp-modal');
+  if(typeof deal === 'number') deal = window._tableData && window._tableData[deal];
+  _editingKey = (deal && deal._key) ? deal._key : null;
   document.getElementById('modal-title').textContent = deal ? 'Editar Oportunidad' : 'Nueva Oportunidad';
   document.getElementById('btn-delete-opp').style.display = deal ? 'block' : 'none';
-
-  const fields = ['oportunidad','cuenta','rep','estado','tipo','canal','origen','segmento',
-                  'ciudad','riesgo','mes_inicio','mes_radicacion','broker','motivo_perdida','comentarios'];
-  fields.forEach(f=>{
-    const el = document.getElementById('f-'+f);
-    if(el) el.value = deal?.[f] || '';
+  var fields = ['oportunidad','cuenta','rep','estado','tipo','canal','origen','riesgo','mes_inicio','mes_radicacion','broker','motivo_perdida','comentarios'];
+  fields.forEach(function(f){
+    var el = document.getElementById('f-'+f);
+    if(el) el.value = (deal && deal[f]) ? deal[f] : '';
   });
-  if(deal){
-    document.getElementById('f-valor').value = deal.valor || 0;
-    document.getElementById('f-prob').value  = Math.round((deal.prob||0)*100);
-  } else {
-    document.getElementById('f-valor').value = '';
-    document.getElementById('f-prob').value  = '';
-    // If rep user, pre-fill their name
-    if(currentRole==='rep') document.getElementById('f-rep').value = currentRep;
-  }
-  modal.classList.add('open');
+  document.getElementById('f-valor').value = deal ? (deal.valor||0) : '';
+  document.getElementById('f-prob').value  = deal ? Math.round((deal.prob||0)*100) : '';
+  if(!deal && currentRole==='rep') document.getElementById('f-rep').value = currentRep||'';
+  document.getElementById('opp-modal').classList.add('open');
 }
-
-function closeModal(){
+function closeOppModal(){
   document.getElementById('opp-modal').classList.remove('open');
   _editingKey = null;
 }
-
 function saveOpp(){
-  const oportunidad = document.getElementById('f-oportunidad').value.trim();
-  const cuenta      = document.getElementById('f-cuenta').value.trim();
-  const rep         = document.getElementById('f-rep').value.trim();
-  if(!oportunidad || !cuenta || !rep){
-    alert('Oportunidad, Cuenta y Rep son obligatorios.');
-    return;
-  }
-  const prob  = (parseFloat(document.getElementById('f-prob').value)||0) / 100;
-  const valor = parseFloat(document.getElementById('f-valor').value)||0;
-  const deal = {
-    oportunidad,
-    cuenta,
-    rep,
-    estado:         document.getElementById('f-estado').value,
-    estado2:        ['Ganado','Perdido','abandonado'].includes(document.getElementById('f-estado').value)?'Cerrado':'Abierto',
-    valor,
-    prob,
-    esperado:       Math.round(valor * prob),
-    tipo:           document.getElementById('f-tipo').value,
-    canal:          document.getElementById('f-canal').value,
-    origen:         document.getElementById('f-origen').value,
-    segmento:       document.getElementById('f-segmento').value,
-    ciudad:         document.getElementById('f-ciudad').value,
-    riesgo:         document.getElementById('f-riesgo').value,
-    mes_inicio:     document.getElementById('f-mes_inicio').value,
-    mes_radicacion: document.getElementById('f-mes_radicacion').value,
-    broker:         document.getElementById('f-broker').value,
-    motivo_perdida: document.getElementById('f-motivo_perdida').value,
-    comentarios:    document.getElementById('f-comentarios').value,
-    anio_inicio:    2026,
-    anio_radicacion:2026,
+  var oportunidad = document.getElementById('f-oportunidad').value.trim();
+  var cuenta      = document.getElementById('f-cuenta').value.trim();
+  var rep         = document.getElementById('f-rep').value.trim();
+  if(!oportunidad||!cuenta||!rep){ alert('Oportunidad, Cuenta y Rep son obligatorios.'); return; }
+  var prob  = (parseFloat(document.getElementById('f-prob').value)||0)/100;
+  var valor = parseFloat(document.getElementById('f-valor').value)||0;
+  var estado = document.getElementById('f-estado').value;
+  var deal = {
+    oportunidad:oportunidad, cuenta:cuenta, rep:rep, estado:estado,
+    valor:valor, prob:prob, esperado:Math.round(valor*prob),
+    tipo:document.getElementById('f-tipo').value,
+    canal:document.getElementById('f-canal').value,
+    origen:document.getElementById('f-origen').value,
+    riesgo:document.getElementById('f-riesgo').value,
+    mes_inicio:document.getElementById('f-mes_inicio').value,
+    mes_radicacion:document.getElementById('f-mes_radicacion').value,
+    broker:document.getElementById('f-broker').value,
+    motivo_perdida:document.getElementById('f-motivo_perdida').value,
+    comentarios:document.getElementById('f-comentarios').value,
+    anio_inicio:2026, anio_radicacion:2026
   };
-
   setSyncStatus('syncing');
-  const db = window._db;
-  const dbRef = window._dbRef;
-
+  var db=window._db, dbRef=window._dbRef;
   if(_editingKey){
     window._dbUpdate(dbRef(db,'deals/'+_editingKey), deal)
-      .then(()=>{ setSyncStatus('synced'); closeModal(); })
-      .catch(()=>setSyncStatus('error'));
+      .then(function(){ setSyncStatus('synced'); closeOppModal(); })
+      .catch(function(){ setSyncStatus('error'); });
   } else {
     window._dbPush(dbRef(db,'deals'), deal)
-      .then(()=>{ setSyncStatus('synced'); closeModal(); })
-      .catch(()=>setSyncStatus('error'));
+      .then(function(){ setSyncStatus('synced'); closeOppModal(); })
+      .catch(function(){ setSyncStatus('error'); });
   }
 }
-
 function deleteOpp(){
   if(!_editingKey) return;
-  if(!confirm('¿Estás segura de eliminar esta oportunidad?')) return;
+  if(!confirm('¿Seguro que quieres eliminar esta oportunidad?')) return;
   setSyncStatus('syncing');
-  const db = window._db;
-  const dbRef = window._dbRef;
+  var db=window._db, dbRef=window._dbRef;
   window._dbRemove(dbRef(db,'deals/'+_editingKey))
-    .then(()=>{ setSyncStatus('synced'); closeModal(); })
-    .catch(()=>setSyncStatus('error'));
+    .then(function(){ setSyncStatus('synced'); closeOppModal(); })
+    .catch(function(){ setSyncStatus('error'); });
 }
 
-// Click outside modal to close
-document.getElementById('opp-modal').addEventListener('click', function(e){
-  if(e.target===this) closeModal();
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('modal-close-btn').addEventListener('click', closeOppModal);
+  document.getElementById('modal-cancel-btn').addEventListener('click', closeOppModal);
+  document.getElementById('modal-save-btn').addEventListener('click', saveOpp);
+  document.getElementById('btn-delete-opp').addEventListener('click', deleteOpp);
+  document.getElementById('opp-modal').addEventListener('click', function(e){ if(e.target===this) closeOppModal(); });
 });
 
-// ══════════════════════════════════════════════
-// REP VIEW
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// NAV USER BADGE
+// ═══════════════════════════════════════════════════════════
+function renderNavUser(){
+  var navRight = document.querySelector('.nav-right');
+  if(!navRight) return;
+  var initials2 = currentUser.split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase();
+  var roleLabel = currentRole==='gerencia' ? 'Gerencia' : 'Rep';
+  var roleClass = currentRole==='gerencia' ? 'role-gerencia' : 'role-rep';
+  navRight.innerHTML = ''
+    + '<span style="font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center">'
+      + '<span class="sync-dot synced" id="sync-dot"></span>'
+      + '<span id="sync-lbl">Sincronizado</span>'
+    + '</span>'
+    + '<button class="btn-add-opp" id="nav-add-btn">＋ Agregar</button>'
+    + '<div class="user-badge">'
+      + '<div class="user-avatar">'+initials2+'</div>'
+      + '<span class="user-name">'+currentUser+'</span>'
+      + '<span class="user-role-badge '+roleClass+'">'+roleLabel+'</span>'
+    + '</div>'
+    + '<button class="btn-logout" id="nav-logout-btn">Salir</button>';
+  document.getElementById('nav-add-btn').addEventListener('click', function(){ openModal(null); });
+  document.getElementById('nav-logout-btn').addEventListener('click', logout);
+}
+
+// ═══════════════════════════════════════════════════════════
+// REP DASHBOARD
+// ═══════════════════════════════════════════════════════════
+var _repTableFilter = 'todos';
+var _repTableSort = {key:'valor', dir:-1};
+
+function filterRepTable(filter){
+  _repTableFilter = filter;
+  document.querySelectorAll('.rep-filter-chip').forEach(function(c){ c.classList.toggle('active', c.dataset.filter===filter); });
+  document.querySelectorAll('.rep-metric').forEach(function(m){ m.classList.toggle('active', m.dataset.metric===filter); });
+  renderRepTable();
+}
+function sortRepTable(key){
+  if(_repTableSort.key===key) _repTableSort.dir*=-1; else { _repTableSort.key=key; _repTableSort.dir=-1; }
+  renderRepTable();
+}
+
 function renderRepView(){
-  const repContainer = document.getElementById('rep-view-container');
-  if(!repContainer) return;
+  var rc = document.getElementById('rep-view-container');
+  if(!rc) return;
+  var src = liveDeals.length>0 ? liveDeals : RAW;
+  var myDeals = src.filter(function(d){ return d.rep===currentRep && d.oportunidad && d.cuenta; });
+  var activos  = myDeals.filter(function(d){ return ESTADOS_ACTIVOS.has(d.estado); });
+  var ganados  = myDeals.filter(function(d){ return d.estado==='Ganado'; });
+  var perdidos = myDeals.filter(function(d){ return d.estado==='Perdido'; });
+  var cerrados = ganados.concat(perdidos);
+  var vT = myDeals.reduce(function(s,d){ return s+(d.valor||0); },0);
+  var vA = activos.reduce(function(s,d){ return s+(d.valor||0); },0);
+  var vG = ganados.reduce(function(s,d){ return s+(d.valor||0); },0);
+  var vP = perdidos.reduce(function(s,d){ return s+(d.valor||0); },0);
+  var vE = activos.reduce(function(s,d){ return s+(d.esperado||0); },0);
+  var wr = cerrados.length>0 ? Math.round(ganados.length/cerrados.length*100) : 0;
+  var qd = QUOTA_REPS.find(function(q){ return q.rep===currentRep; }) || {cuota:0,cumplimiento:0,porcentaje:0,to_go:0};
+  var pct = Math.min(qd.porcentaje||0, 100);
+  var bc  = pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
 
-  const myDeals = liveDeals.filter(d => d.rep === currentRep && d.oportunidad && d.cuenta);
-  const activos  = myDeals.filter(d => ESTADOS_ACTIVOS.has(d.estado));
-  const ganados  = myDeals.filter(d => d.estado==='Ganado');
-  const perdidos = myDeals.filter(d => d.estado==='Perdido');
-  const cerrados = [...ganados, ...perdidos];
-
-  const valorTotal    = myDeals.reduce((s,d)=>s+(d.valor||0),0);
-  const valorActivo   = activos.reduce((s,d)=>s+(d.valor||0),0);
-  const valorGanado   = ganados.reduce((s,d)=>s+(d.valor||0),0);
-  const valorPerdido  = perdidos.reduce((s,d)=>s+(d.valor||0),0);
-  const valorEsperado = activos.reduce((s,d)=>s+(d.esperado||0),0);
-  const winRate = cerrados.length>0 ? Math.round(ganados.length/cerrados.length*100) : 0;
-
-  const quotaData = QUOTA_REPS.find(q=>q.rep===currentRep) || {cuota:0,cumplimiento:0,porcentaje:0,to_go:0};
-  const pct = Math.min(quotaData.porcentaje||0, 100);
-  const barColor = pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
-
-  const estadoBreak = {};
-  activos.forEach(d=>{ estadoBreak[d.estado]=(estadoBreak[d.estado]||0)+1; });
-
-  const top5 = [...activos].sort((a,b)=>(b.valor||0)-(a.valor||0)).slice(0,5);
-
-  const estadoRows = Object.entries(estadoBreak).sort((a,b)=>b[1]-a[1]).map(([est,cnt])=>{
-    const s=EST_STYLE[est]||{bg:'#f0efe9',cl:'#6b6b67'};
-    const total=activos.length||1;
-    const w=Math.round(cnt/total*100);
-    return '<div style="margin-bottom:10px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-        +'<span style="font-size:12px;font-weight:500;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+est+'</span>'
-        +'<span style="font-size:12px;color:#6b6b67">'+cnt+' · '+w+'%</span>'
-      +'</div>'
+  // Estado breakdown
+  var eb = {}; activos.forEach(function(d){ eb[d.estado]=(eb[d.estado]||0)+1; });
+  var ebHtml = Object.entries(eb).sort(function(a,b){ return b[1]-a[1]; }).map(function(kv){
+    var est=kv[0], cnt=kv[1];
+    var s=EST_STYLE[est]||{bg:'#f0efe9',cl:'#6b6b67'};
+    var w=Math.round(cnt/(activos.length||1)*100);
+    var div=document.createElement('div');
+    div.style.cssText='margin-bottom:10px;cursor:pointer;border-radius:8px;padding:6px';
+    div.dataset.est=est;
+    div.addEventListener('click',function(){ filterRepTable(this.dataset.est); });
+    div.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:12px;font-weight:500;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+est+'</span>'
+      +'<span style="font-size:12px;color:#6b6b67">'+cnt+' · '+w+'%</span></div>'
       +'<div style="height:6px;background:#f0efe9;border-radius:99px;overflow:hidden">'
-        +'<div style="width:'+w+'%;height:100%;background:'+s.cl+';border-radius:99px;opacity:.7"></div>'
-      +'</div>'
-    +'</div>';
+      +'<div style="width:'+w+'%;height:100%;background:'+s.cl+';border-radius:99px;opacity:.7"></div></div>';
+    return div.outerHTML;
   }).join('');
 
-  const top5Rows = top5.length===0
-    ? '<p style="font-size:12px;color:#9b9b96">Sin oportunidades activas</p>'
-    : top5.map(function(d,i){
-        window._repTop5 = window._repTop5||[];
-        window._repTop5[i] = d;
+  // Top 5
+  window._repTop5 = activos.slice().sort(function(a,b){ return (b.valor||0)-(a.valor||0); }).slice(0,5);
+  var t5Html = window._repTop5.length===0 ? '<p style="font-size:12px;color:#9b9b96">Sin oportunidades activas</p>'
+    : window._repTop5.map(function(d,i){
         var s=EST_STYLE[d.estado]||{bg:'#f0efe9',cl:'#6b6b67'};
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer" onclick="openModal(window._repTop5['+i+'])">'
-          +'<div>'
-            +'<div style="font-size:12px;font-weight:600;color:#1a1a18">'+d.oportunidad+'</div>'
-            +'<div style="font-size:11px;color:#6b6b67">'+d.cuenta+'</div>'
-          +'</div>'
+        var div=document.createElement('div');
+        div.style.cssText='display:flex;justify-content:space-between;padding:8px;border-radius:8px;cursor:pointer';
+        div.dataset.idx=i;
+        div.addEventListener('click',function(){ openModal(window._repTop5[parseInt(this.dataset.idx)]); });
+        div.innerHTML='<div>'
+          +'<div style="font-size:12px;font-weight:600">'+d.oportunidad+'</div>'
+          +'<div style="font-size:11px;color:#6b6b67">'+d.cuenta+'</div></div>'
           +'<div style="text-align:right">'
-            +'<div style="font-size:12px;font-weight:700">'+fmt(d.valor||0)+'</div>'
-            +'<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span>'
-          +'</div>'
-        +'</div>';
+          +'<div style="font-size:12px;font-weight:700">'+fmt(d.valor||0)+'</div>'
+          +'<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span></div>';
+        return div.outerHTML;
       }).join('');
 
-  const quotaBlock = quotaData.cuota>0
-    ? '<div class="card" style="margin-bottom:14px">'
-        +'<p class="section-lbl">Avance vs Cuota 2026</p>'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">'
-          +'<span style="font-size:24px;font-weight:700;color:'+barColor+'">'+pct+'%</span>'
-          +'<div style="display:flex;gap:16px;font-size:12px">'
-            +'<span style="color:#16a34a">✓ '+fmt(quotaData.cumplimiento)+'</span>'
-            +'<span style="color:#6b6b67">Meta: '+fmt(quotaData.cuota)+'</span>'
-            +'<span style="color:#d97706">Falta: '+fmt(Math.max(quotaData.to_go||0,0))+'</span>'
-          +'</div>'
-        +'</div>'
-        +'<div class="rep-quota-bar-bg" style="height:14px">'
-          +'<div class="rep-quota-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div>'
-        +'</div>'
-      +'</div>'
-    : '';
-
-  repContainer.innerHTML =
-    '<div class="rep-hero">'
-      +'<div class="rep-hero-name">👋 '+currentRep+'</div>'
-      +'<div class="rep-hero-sub">'+new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div>'
-    +'</div>'
-    +'<div class="rep-metrics">'
-      +'<div class="rep-metric"><div class="rep-metric-lbl">Pipeline Total</div><div class="rep-metric-val">'+fmt(valorTotal)+'</div><div class="rep-metric-sub">'+myDeals.length+' oportunidades</div></div>'
-      +'<div class="rep-metric"><div class="rep-metric-lbl">Pipeline Activo</div><div class="rep-metric-val" style="color:#2563EB">'+fmt(valorActivo)+'</div><div class="rep-metric-sub">'+activos.length+' en curso</div></div>'
-      +'<div class="rep-metric"><div class="rep-metric-lbl">Ganado 2026</div><div class="rep-metric-val" style="color:#16a34a">'+fmt(valorGanado)+'</div><div class="rep-metric-sub">'+ganados.length+' cierres · Win rate '+winRate+'%</div></div>'
-      +'<div class="rep-metric"><div class="rep-metric-lbl">Perdido</div><div class="rep-metric-val" style="color:#dc2626">'+fmt(valorPerdido)+'</div><div class="rep-metric-sub">'+perdidos.length+' oportunidades</div></div>'
-      +'<div class="rep-metric"><div class="rep-metric-lbl">Valor Esperado</div><div class="rep-metric-val" style="color:#7c3aed">'+fmt(valorEsperado)+'</div><div class="rep-metric-sub">prob. ponderado activos</div></div>'
-    +'</div>'
-    + quotaBlock
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
-      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Por Estado</p>'+estadoRows+'</div>'
-      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Top Activas</p>'+top5Rows+'</div>'
-    +'</div>';
-}
-
-// ══════════════════════════════════════════════
-// OVERRIDE getCleanData to use liveDeals
-// ══════════════════════════════════════════════
-function getCleanData(){
-  const source = (window._liveData && window._liveData.length>0) ? window._liveData : RAW_SEED;
-  const ESTADOS_VALIDOS = new Set(['Identificado','En diseño','Cotizado','Negociación','On hold','Ganado','Perdido','abandonado']);
-  let data = source.filter(r=>r.oportunidad && r.cuenta && r.rep);
-  // If rep, filter to own data
-  if(currentRole==='rep' && currentRep){
-    data = data.filter(r=>r.rep===currentRep);
+  // Quota block
+  var qHtml = '';
+  if(qd.cuota>0){
+    qHtml='<div class="card" style="margin-bottom:14px">'
+      +'<p class="section-lbl">Avance vs Cuota 2026 <span id="quota-rep-toggle" style="font-size:10px;color:var(--txt3);cursor:pointer">▾ detalle</span></p>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        +'<span style="font-size:28px;font-weight:800;color:'+bc+'">'+pct+'%</span>'
+        +'<div style="font-size:12px;display:flex;gap:14px">'
+          +'<span style="color:#16a34a">✓ '+fmt(qd.cumplimiento)+'</span>'
+          +'<span style="color:#6b6b67">Meta: '+fmt(qd.cuota)+'</span>'
+          +'<span style="color:#d97706">Falta: '+fmt(Math.max(qd.to_go||0,0))+'</span>'
+        +'</div></div>'
+      +'<div class="rep-quota-bar-bg" style="height:14px"><div class="rep-quota-bar-fill" style="width:'+pct+'%;background:'+bc+'"></div></div>'
+      +'<div class="quota-detail-panel" id="quota-detail-rep">'
+        +'<div class="quota-detail-grid">'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Cuota</div><div class="quota-detail-val">'+fmt(qd.cuota)+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Cumplido</div><div class="quota-detail-val" style="color:'+bc+'">'+fmt(qd.cumplimiento)+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Por lograr</div><div class="quota-detail-val" style="color:#d97706">'+fmt(Math.max(qd.to_go||0,0))+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">% alcanzado</div><div class="quota-detail-val" style="color:'+bc+'">'+pct+'%</div></div>'
+        +'</div></div></div>';
   }
-  return data.filter(r=>(r.valor>0||ESTADOS_VALIDOS.has(r.estado)||r.estado==='Ganado'||r.estado==='Perdido'||r.estado==='abandonado'));
+
+  rc.innerHTML = '<div class="rep-hero"><div class="rep-hero-name">👋 '+currentRep+'</div>'
+    +'<div class="rep-hero-sub">'+new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+    +'<div class="rep-metrics">'
+      +'<div class="rep-metric" data-metric="todos"><div class="rep-metric-lbl">Pipeline Total</div><div class="rep-metric-val">'+fmt(vT)+'</div><div class="rep-metric-sub">'+myDeals.length+' oportunidades</div></div>'
+      +'<div class="rep-metric" data-metric="activo"><div class="rep-metric-lbl">Pipeline Activo</div><div class="rep-metric-val" style="color:#2563EB">'+fmt(vA)+'</div><div class="rep-metric-sub">'+activos.length+' en curso</div></div>'
+      +'<div class="rep-metric" data-metric="Ganado"><div class="rep-metric-lbl">Ganado 2026</div><div class="rep-metric-val" style="color:#16a34a">'+fmt(vG)+'</div><div class="rep-metric-sub">'+ganados.length+' · Win rate '+wr+'%</div></div>'
+      +'<div class="rep-metric" data-metric="Perdido"><div class="rep-metric-lbl">Perdido</div><div class="rep-metric-val" style="color:#dc2626">'+fmt(vP)+'</div><div class="rep-metric-sub">'+perdidos.length+' oportunidades</div></div>'
+      +'<div class="rep-metric" data-metric="activo"><div class="rep-metric-lbl">Valor Esperado</div><div class="rep-metric-val" style="color:#7c3aed">'+fmt(vE)+'</div><div class="rep-metric-sub">ponderado activos</div></div>'
+    +'</div>'
+    + qHtml
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
+      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Por Estado</p>'+ebHtml+'</div>'
+      +'<div class="card" style="margin-bottom:0"><p class="section-lbl">Top Activas</p>'+t5Html+'</div>'
+    +'</div>';
+
+  // Attach events
+  rc.querySelectorAll('.rep-metric').forEach(function(m){
+    m.addEventListener('click', function(){ filterRepTable(this.dataset.metric); });
+  });
+  var qt = document.getElementById('quota-rep-toggle');
+  if(qt){ qt.addEventListener('click', function(){
+    var p = document.getElementById('quota-detail-rep');
+    if(p) p.classList.toggle('open');
+  }); }
 }
 
-// ══════════════════════════════════════════════
-// ADD EDIT BUTTON TO TABLE ROWS
-// ══════════════════════════════════════════════
-function addEditButtons(){
-  // Override renderTable to add edit buttons
-  const orig = window._origRenderTable || document.getElementById;
-  // Hook into table rendering
+function renderRepTable(){
+  var wrap = document.getElementById('rep-table-wrap');
+  if(!wrap) return;
+  var src = liveDeals.length>0 ? liveDeals : RAW;
+  var all = src.filter(function(d){ return d.rep===currentRep && d.oportunidad && d.cuenta; });
+  var flt;
+  if(_repTableFilter==='todos')        flt=all;
+  else if(_repTableFilter==='activo')  flt=all.filter(function(d){ return ESTADOS_ACTIVOS.has(d.estado); });
+  else if(_repTableFilter==='Ganado')  flt=all.filter(function(d){ return d.estado==='Ganado'; });
+  else if(_repTableFilter==='Perdido') flt=all.filter(function(d){ return d.estado==='Perdido'||d.estado==='abandonado'; });
+  else                                  flt=all.filter(function(d){ return d.estado===_repTableFilter; });
+  flt = flt.slice().sort(function(a,b){
+    var av=a[_repTableSort.key]||'', bv=b[_repTableSort.key]||'';
+    if(typeof av==='number') return (av-bv)*_repTableSort.dir;
+    return String(av).localeCompare(String(bv))*_repTableSort.dir;
+  });
+  window._repTableData = flt;
+
+  var chipCounts = {
+    todos:  all.length,
+    activo: all.filter(function(d){ return ESTADOS_ACTIVOS.has(d.estado); }).length,
+    Ganado: all.filter(function(d){ return d.estado==='Ganado'; }).length,
+    Perdido:all.filter(function(d){ return d.estado==='Perdido'||d.estado==='abandonado'; }).length
+  };
+
+  var fbar = document.createElement('div');
+  fbar.className = 'rep-filter-bar';
+  Object.keys(chipCounts).forEach(function(f){
+    var lbl = {todos:'Todas',activo:'Activas',Ganado:'Ganadas',Perdido:'Perdidas'}[f];
+    var chip = document.createElement('button');
+    chip.className = 'rep-filter-chip'+(f===_repTableFilter?' active':'');
+    chip.dataset.filter = f;
+    chip.textContent = lbl+' ('+chipCounts[f]+')';
+    chip.addEventListener('click', function(){ filterRepTable(this.dataset.filter); });
+    fbar.appendChild(chip);
+  });
+  var cs = document.createElement('span');
+  cs.style.cssText='margin-left:auto;font-size:11px;color:var(--txt3)';
+  cs.textContent=flt.length+' resultado'+(flt.length!==1?'s':'');
+  fbar.appendChild(cs);
+
+  var table = document.createElement('table');
+  table.style.cssText='width:100%;border-collapse:collapse;font-size:13px';
+  var thead = document.createElement('thead');
+  var htr = document.createElement('tr');
+  htr.style.cssText='border-bottom:1.5px solid rgba(0,0,0,0.08)';
+  var cols = [{k:'oportunidad',l:'OPORTUNIDAD',a:'left'},{k:'cuenta',l:'CUENTA',a:'left'},{k:'estado',l:'ESTADO',a:'left'},{k:'valor',l:'VALOR',a:'right'},{k:'prob',l:'PROB',a:'right'},{k:'mes_radicacion',l:'RADICACIÓN',a:'left'}];
+  cols.forEach(function(col){
+    var th=document.createElement('th');
+    th.style.cssText='text-align:'+col.a+';padding:8px 10px';
+    var b=document.createElement('button');
+    b.className='rep-sort-btn'+(_repTableSort.key===col.k?' sorted':'');
+    b.dataset.sort=col.k;
+    b.textContent=col.l+(_repTableSort.key===col.k?(_repTableSort.dir>0?' ↑':' ↓'):'');
+    b.addEventListener('click',function(){ sortRepTable(this.dataset.sort); });
+    th.appendChild(b);
+    htr.appendChild(th);
+  });
+  htr.appendChild(document.createElement('th'));
+  thead.appendChild(htr);
+  table.appendChild(thead);
+
+  var tbody=document.createElement('tbody');
+  if(flt.length===0){
+    var tr=document.createElement('tr');
+    var td=document.createElement('td');
+    td.colSpan=7; td.style.cssText='text-align:center;padding:24px;color:#9b9b96;font-size:13px';
+    td.textContent='No hay oportunidades en esta categoría';
+    tr.appendChild(td); tbody.appendChild(tr);
+  }
+  flt.forEach(function(d,idx){
+    var s=EST_STYLE[d.estado]||{bg:'#f0efe9',cl:'#6b6b67'};
+    var tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer;transition:background .1s';
+    tr.addEventListener('mouseover',function(){ this.style.background='#f8f8f6'; });
+    tr.addEventListener('mouseout', function(){ this.style.background=''; });
+    var cells=[
+      {s:'padding:9px 10px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',t:d.oportunidad,ti:d.oportunidad},
+      {s:'padding:9px 10px;color:#6b6b67',t:d.cuenta},
+      {s:'padding:9px 10px',h:'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span>'},
+      {s:'padding:9px 10px;text-align:right;font-weight:600',t:fmt(d.valor||0)},
+      {s:'padding:9px 10px;text-align:right;color:#6b6b67',t:Math.round((d.prob||0)*100)+'%'},
+      {s:'padding:9px 10px;color:#9b9b96;font-size:11px',t:d.mes_radicacion||''}
+    ];
+    cells.forEach(function(c){
+      var td=document.createElement('td');
+      td.style.cssText=c.s;
+      if(c.ti) td.title=c.ti;
+      if(c.h) td.innerHTML=c.h; else td.textContent=c.t;
+      tr.appendChild(td);
+    });
+    var tde=document.createElement('td');
+    tde.style.cssText='padding:9px 4px';
+    var eb=document.createElement('button');
+    eb.className='btn-edit-row'; eb.title='Editar'; eb.textContent='✏️';
+    eb.dataset.idx=idx;
+    eb.addEventListener('click',function(e){ e.stopPropagation(); openModal(window._repTableData[parseInt(this.dataset.idx)]); });
+    tde.appendChild(eb); tr.appendChild(tde); tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  var sw=document.createElement('div'); sw.style.overflowX='auto'; sw.appendChild(table);
+  wrap.innerHTML=''; wrap.appendChild(fbar); wrap.appendChild(sw);
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // INIT APP
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function initApp(){
   renderNavUser();
-
-  // Show/hide rep view tab
-  if(currentRole === 'rep'){
-    // Add rep view page if not exists
-    const nav = document.querySelector('.nav-tabs');
+  if(currentRole==='rep'){
+    var nav=document.querySelector('.nav-tabs');
     if(nav && !document.getElementById('tab-repview')){
-      const btn = document.createElement('button');
-      btn.className = 'nav-tab active';
-      btn.id = 'tab-repview';
-      btn.textContent = '👤 Mi Pipeline';
-      btn.onclick = () => showPage('rep-view', btn);
+      var btn=document.createElement('button');
+      btn.className='nav-tab active'; btn.id='tab-repview'; btn.textContent='👤 Mi Pipeline';
+      btn.addEventListener('click', function(){ showPage('rep-view', this); });
       nav.insertBefore(btn, nav.firstChild);
     }
-    // Add rep view page
-    const pagesContainer = document.querySelector('body');
     if(!document.getElementById('page-rep-view')){
-      const pg = document.createElement('div');
-      pg.id = 'page-rep-view';
-      pg.className = 'page active';
-      pg.innerHTML = '<div id="rep-view-container"></div><div class="card" style="margin-top:0"><p class="section-lbl">Mis Oportunidades</p><div id="rep-table-wrap"></div></div>';
-      // Insert before first page
-      const firstPage = document.querySelector('.page');
-      if(firstPage) firstPage.parentNode.insertBefore(pg, firstPage);
-      // Deactivate other pages
-      document.querySelectorAll('.page').forEach(p=>{ if(p.id!=='page-rep-view') p.classList.remove('active'); });
-      document.querySelectorAll('.nav-tab').forEach(t=>{ if(t.id!=='tab-repview') t.classList.remove('active'); });
+      var pg=document.createElement('div');
+      pg.id='page-rep-view'; pg.className='page active';
+      pg.innerHTML='<div id="rep-view-container"></div><div class="card" style="margin-top:0"><p class="section-lbl">Mis Oportunidades</p><div id="rep-table-wrap"></div></div>';
+      var fp=document.querySelector('.page');
+      if(fp) fp.parentNode.insertBefore(pg, fp);
+      document.querySelectorAll('.page').forEach(function(p){ if(p.id!=='page-rep-view') p.classList.remove('active'); });
+      document.querySelectorAll('.nav-tab').forEach(function(t){ if(t.id!=='tab-repview') t.classList.remove('active'); });
     }
+    // Lock Rep filter
+    document.addEventListener('filtersReady', function(){
+      var rSel=document.getElementById('fRep');
+      if(rSel && currentRep){ rSel.value=currentRep; rSel.disabled=true; rSel.style.opacity='0.6'; rSel.style.cursor='not-allowed'; }
+    });
   }
-
   initFirebase();
-  // Render inmediato con datos locales
-  refreshDashboard();
+  // Immediate render with local data
+  window._liveData = [];
+  applyFilters();
+  if(currentRole==='rep'){ renderRepView(); renderRepTable(); }
 }
 
-// ══════════════════════════════════════════════
-// SHOW PAGE — override to handle rep view
-// ══════════════════════════════════════════════
-const _origShowPage = typeof showPage !== 'undefined' ? showPage : null;
+// ═══════════════════════════════════════════════════════════
+// QUOTA BARS (Gerencia) — using DOM
+// ═══════════════════════════════════════════════════════════
+function renderQuotaBars(){
+  var el=document.getElementById('quota-progress-block');
+  if(!el) return;
+  function fmtQ(v){ return v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$'+(v/1e3).toFixed(0)+'K'; }
+  var tC=QUOTA_REPS.reduce(function(s,r){ return s+r.cumplimiento; },0);
+  var tQ=QUOTA_REPS.reduce(function(s,r){ return s+r.cuota; },0);
+  var tPct=tQ>0?Math.round(tC/tQ*1000)/10:0;
+  el.innerHTML='';
+  QUOTA_REPS.forEach(function(r){
+    var pct=Math.min(r.porcentaje,100);
+    var color=pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
+    var row=document.createElement('div');
+    row.className='quota-rep-row';
+    row.innerHTML='<div class="quota-rep-hdr">'
+      +'<span class="quota-rep-name">'+r.rep+'</span>'
+      +'<div class="quota-rep-nums">'
+        +'<span style="color:var(--green)">✓ '+fmtQ(r.cumplimiento)+'</span>'
+        +'<span>Meta '+fmtQ(r.cuota)+'</span>'
+        +'<span style="font-weight:600;color:'+color+'">'+r.porcentaje+'%</span>'
+        +'<span style="color:var(--txt3);font-size:10px">▾</span>'
+      +'</div></div>'
+      +'<div class="quota-bar-bg"><div class="quota-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+      +'<div class="quota-detail-panel" id="qd-'+r.rep+'">'
+        +'<div class="quota-detail-grid">'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Cuota</div><div class="quota-detail-val">'+fmtQ(r.cuota)+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Cumplido</div><div class="quota-detail-val" style="color:'+color+'">'+fmtQ(r.cumplimiento)+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">Por lograr</div><div class="quota-detail-val" style="color:#d97706">'+fmtQ(Math.max(r.to_go||0,0))+'</div></div>'
+          +'<div class="quota-detail-item"><div class="quota-detail-lbl">% alcanzado</div><div class="quota-detail-val" style="color:'+color+'">'+r.porcentaje+'%</div></div>'
+        +'</div></div>';
+    row.addEventListener('click', function(){
+      var pd=document.getElementById('qd-'+r.rep);
+      if(pd){ pd.classList.toggle('open'); row.classList.toggle('active'); }
+    });
+    el.appendChild(row);
+  });
+  var tot=document.createElement('div');
+  tot.className='quota-total-row';
+  tot.innerHTML='<span class="quota-total-lbl">Total equipo</span>'
+    +'<span class="quota-total-val">'+fmtQ(tC)+' / '+fmtQ(tQ)
+    +' &nbsp;<strong style="color:'+(tPct>=50?'#d97706':'#dc2626')+'">'+tPct+'%</strong></span>';
+  el.appendChild(tot);
+}
 
-// Alias para que el código del dashboard pueda usar RAW
-const RAW = RAW_SEED;
-const MESES_ORD = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const ESTADOS_ACTIVOS = new Set(['Identificado','En diseño','Cotizado','Negociación','On hold']);
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// QUOTA REPS DATA
+// ═══════════════════════════════════════════════════════════
+var QUOTA_REPS = [{"rep":"Patricia","cuota":4500000000,"cumplimiento":960961006,"porcentaje":21.35,"to_go":3539038994},{"rep":"Clemencia","cuota":4500000000,"cumplimiento":794399142,"porcentaje":17.65,"to_go":3705600858},{"rep":"Ivan","cuota":4500000000,"cumplimiento":4866836,"porcentaje":0.11,"to_go":4495133164},{"rep":"Elizabeth","cuota":5400000000,"cumplimiento":408930613,"porcentaje":7.57,"to_go":4991069387}];
+
+// ═══════════════════════════════════════════════════════════
+// OVERRIDE getCleanData
+// ═══════════════════════════════════════════════════════════
+function getCleanData(){
+  var src = (window._liveData && window._liveData.length>0) ? window._liveData : RAW;
+  var data = src.filter(function(r){ return r.oportunidad && r.cuenta && r.rep; });
+  if(currentRole==='rep' && currentRep) data = data.filter(function(r){ return r.rep===currentRep; });
+  return data;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PATCH applyFilters to add edit buttons + rep table refresh
+// ═══════════════════════════════════════════════════════════
+var _origApplyFilters = null;
+
 const CUOTA = 18900000000;
+const GANADO_TOTAL_REAL = 4234102788;
 const VALOR_ESP_AÑO = 15222226210;
-const QUOTA_REPS = [{"rep":"Patricia","cuota":4500000000,"cumplimiento":960961006,"porcentaje":21.35,"to_go":3539038994},{"rep":"Clemencia","cuota":4500000000,"cumplimiento":794399142,"porcentaje":17.65,"to_go":3705600858},{"rep":"Ivan","cuota":4500000000,"cumplimiento":4866836,"porcentaje":0.11,"to_go":4495133164},{"rep":"Elizabeth","cuota":5400000000,"cumplimiento":408930613,"porcentaje":7.57,"to_go":4991069387}];
-const MESES_ESP = {"enero":467895185,"febrero":521354205,"marzo":1033568801,"abril":461606502,"mayo":543472205,"junio":1672093726,"julio":1234567890,"agosto":987654321,"septiembre":654321098,"octubre":543210987,"noviembre":432109876,"diciembre":622500000,"Definir":6047671414};
+
+// ═══════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════
+const ESTADOS_ACTIVOS = new Set(['Cotizado','Identificado','Negociación','On hold','En diseño']);
+const MESES_ORD = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const AV_COLORS = [
   {bg:'#BFDBFE',cl:'#1e3a8a'},{bg:'#BBF7D0',cl:'#14532d'},
   {bg:'#FDE68A',cl:'#78350f'},{bg:'#FECACA',cl:'#7f1d1d'},
@@ -1026,10 +1034,6 @@ let filtered=[];
 let sortKey='valor', sortDir=-1;
 let charts={};
 
-function _origGetCleanData(){
-  return RAW.filter(r=>r.oportunidad!=='Sin definir'&&r.cuenta!=='Sin definir'&&r.rep!=='Sin definir'&&r.estado!=='Sin definir'&&(r.valor>0||ESTADOS_ACTIVOS.has(r.estado)||r.estado==='Ganado'||r.estado==='Perdido'||r.estado==='abandonado'));
-}
-
 function populateFilters(){
   const data=getCleanData();
   const reps=[...new Set(data.map(r=>r.rep))].sort();
@@ -1041,13 +1045,6 @@ function populateFilters(){
   reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rSel.appendChild(o);});
   estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
   origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
-  // Si es Rep, fijar y bloquear el filtro de Rep
-  if(currentRole==='rep' && currentRep){
-    rSel.value = currentRep;
-    rSel.disabled = true;
-    rSel.style.opacity = '0.6';
-    rSel.style.cursor = 'not-allowed';
-  }
 }
 
 function applyFilters(){
@@ -1356,128 +1353,36 @@ document.getElementById('navDate').textContent='Jun 2026';
 populateFilters();
 applyFilters();
 
-// ── Barras de progreso por rep (QUOTA_REPS) ──────────────────────────────────
+
+// After original logic loads, patch applyFilters and init
 (function(){
-  var el = document.getElementById('quota-progress-block');
-  if(!el || typeof QUOTA_REPS === 'undefined') return;
-  function fmtQ(v){
-    if(v>=1e9)return'$'+(v/1e9).toFixed(1)+'B';
-    if(v>=1e6)return'$'+(v/1e6).toFixed(0)+'M';
-    return'$'+(v/1e3).toFixed(0)+'K';
+  _origApplyFilters = applyFilters;
+  window.applyFilters = function(){
+    _origApplyFilters();
+    setTimeout(function(){
+      document.querySelectorAll('#tbl-main tr').forEach(function(tr,i){
+        if(i===0||tr.querySelector('.btn-edit-row')) return;
+        var deal=window._tableData&&window._tableData[i-1];
+        if(!deal) return;
+        var td=document.createElement('td');
+        var btn=document.createElement('button');
+        btn.className='btn-edit-row'; btn.title='Editar'; btn.textContent='✏️';
+        btn.dataset.idx=i-1;
+        btn.addEventListener('click',function(e){ e.stopPropagation(); openModal(window._tableData[parseInt(this.dataset.idx)]); });
+        td.appendChild(btn); tr.appendChild(td);
+      });
+      if(currentRole==='rep') renderRepTable();
+    }, 100);
+  };
+  // Lock rep filter after populate
+  if(currentRole==='rep' && currentRep){
+    var rSel=document.getElementById('fRep');
+    if(rSel){ rSel.value=currentRep; rSel.disabled=true; rSel.style.opacity='0.6'; rSel.style.cursor='not-allowed'; }
   }
-  var totalCumplimiento = QUOTA_REPS.reduce(function(s,r){return s+r.cumplimiento;},0);
-  var totalCuotaSum     = QUOTA_REPS.reduce(function(s,r){return s+r.cuota;},0);
-  var totalPct = totalCuotaSum>0 ? Math.round(totalCumplimiento/totalCuotaSum*1000)/10 : 0;
-  var html = QUOTA_REPS.map(function(r){
-    var pct   = Math.min(r.porcentaje, 100);
-    var color = pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
-    return '<div class="quota-rep-row">'
-      +'<div class="quota-rep-hdr">'
-        +'<span class="quota-rep-name">'+r.rep+'</span>'
-        +'<div class="quota-rep-nums">'
-          +'<span style="color:var(--green)">✓ '+fmtQ(r.cumplimiento)+'</span>'
-          +'<span>Meta '+fmtQ(r.cuota)+'</span>'
-          +'<span style="font-weight:600;color:'+color+'">'+r.porcentaje+'%</span>'
-        +'</div>'
-      +'</div>'
-      +'<div class="quota-bar-bg"><div class="quota-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
-    +'</div>';
-  }).join('');
-  html += '<div class="quota-total-row">'
-    +'<span class="quota-total-lbl">Total equipo</span>'
-    +'<span class="quota-total-val">'+fmtQ(totalCumplimiento)+' / '+fmtQ(totalCuotaSum)
-      +' &nbsp;<strong style="color:'+(totalPct>=50?'#d97706':'#dc2626')+'">'+totalPct+'%</strong></span>'
-  +'</div>';
-  el.innerHTML = html;
+  // Render quota bars
+  renderQuotaBars();
 })();
 
-
-// Patch showPage to handle rep-view
-const _patchedShowPage = showPage;
-window.showPage = function(id, btn){
-  _patchedShowPage(id, btn);
-};
-
-// After dashboard renders table rows, patch them to add edit buttons
-const _origApplyFilters = applyFilters;
-window.applyFilters = function(){
-  _origApplyFilters();
-  // Add edit buttons to table after render
-  setTimeout(()=>{
-    document.querySelectorAll('#tbl-main tr').forEach((tr,i)=>{
-      if(i===0) return; // skip header
-      if(tr.querySelector('.btn-edit-row')) return;
-      const deal = window._tableData?.[i-1];
-      if(!deal) return;
-      const td = document.createElement('td');
-      td.innerHTML = `<button class="btn-edit-row" title="Editar">✏️</button>`;
-      td.querySelector('button').onclick = (e)=>{ e.stopPropagation(); openModal(deal); };
-      tr.appendChild(td);
-    });
-    // Also render rep table if in rep view
-    if(currentRole==='rep') renderRepTable();
-  }, 100);
-};
-
-function renderRepTable(){
-  const wrap = document.getElementById('rep-table-wrap');
-  if(!wrap) return;
-  window._repTableData = liveDeals.filter(d=>d.rep===currentRep && d.oportunidad && d.cuenta)
-    .sort((a,b)=>(b.valor||0)-(a.valor||0));
-
-  var rows = window._repTableData.map(function(d,idx){
-    var s = EST_STYLE[d.estado]||{bg:'#f0efe9',cl:'#6b6b67'};
-    var badgeHtml = '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+s.bg+';color:'+s.cl+'">'+d.estado+'</span>';
-    return '<tr style="border-bottom:0.5px solid rgba(0,0,0,0.05);cursor:pointer"'
-      +'>'  
-      +'<td style="padding:9px 10px;font-weight:500">'+d.oportunidad+'</td>'
-      +'<td style="padding:9px 10px;color:#6b6b67">'+d.cuenta+'</td>'
-      +'<td style="padding:9px 10px">'+badgeHtml+'</td>'
-      +'<td style="padding:9px 10px;text-align:right;font-weight:600">'+fmt(d.valor||0)+'</td>'
-      +'<td style="padding:9px 10px;text-align:right;color:#6b6b67">'+Math.round((d.prob||0)*100)+'%</td>'
-      +'<td style="padding:9px 4px"><button class="btn-edit-row" onclick="openModal(window._repTableData['+idx+'])" title="Editar">✏️</button></td>'
-      +'</tr>';
-  }).join('');
-
-  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px">'
-    +'<thead><tr style="border-bottom:1.5px solid rgba(0,0,0,0.08)">'
-      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">OPORTUNIDAD</th>'
-      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">CUENTA</th>'
-      +'<th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">ESTADO</th>'
-      +'<th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">VALOR</th>'
-      +'<th style="text-align:right;padding:8px 10px;font-size:11px;color:#6b6b67;font-weight:600">PROB</th>'
-      +'<th style="padding:8px 4px"></th>'
-    +'</tr></thead>'
-    +'<tbody>'+rows+'</tbody>'
-  +'</table>';
-}
-
-
-// Wire up init
-document.getElementById('navDate').textContent='Jun 2026';
-populateFilters();
-applyFilters();
-
-// Barras de progreso por rep
-(function(){
-  var el = document.getElementById('quota-progress-block');
-  if(!el || typeof QUOTA_REPS === 'undefined') return;
-  function fmtQ(v){
-    if(v>=1e9)return'$'+(v/1e9).toFixed(1)+'B';
-    if(v>=1e6)return'$'+(v/1e6).toFixed(0)+'M';
-    return'$'+(v/1e3).toFixed(0)+'K';
-  }
-  var totalC = QUOTA_REPS.reduce(function(s,r){return s+r.cumplimiento;},0);
-  var totalQ = QUOTA_REPS.reduce(function(s,r){return s+r.cuota;},0);
-  var totalPct = totalQ>0 ? Math.round(totalC/totalQ*1000)/10 : 0;
-  var html = QUOTA_REPS.map(function(r){
-    var pct=Math.min(r.porcentaje,100);
-    var color=pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
-    return '<div class="quota-rep-row"><div class="quota-rep-hdr"><span class="quota-rep-name">'+r.rep+'</span><div class="quota-rep-nums"><span style="color:var(--green)">✓ '+fmtQ(r.cumplimiento)+'</span><span>Meta '+fmtQ(r.cuota)+'</span><span style="font-weight:600;color:'+color+'">'+r.porcentaje+'%</span></div></div><div class="quota-bar-bg"><div class="quota-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';
-  }).join('');
-  html += '<div class="quota-total-row"><span class="quota-total-lbl">Total equipo</span><span class="quota-total-val">'+fmtQ(totalC)+' / '+fmtQ(totalQ)+' &nbsp;<strong style="color:'+(totalPct>=50?'#d97706':'#dc2626')+'">'+totalPct+'%</strong></span></div>';
-  el.innerHTML = html;
-})();
 </script>
 </body>
 </html>
