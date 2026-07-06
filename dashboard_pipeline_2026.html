@@ -436,6 +436,7 @@ tr:last-child td{border-bottom:none}
             <th onclick="sortTable('origen')">Origen <span class="sort-ico">↕</span></th>
             <th onclick="sortTable('segmento')">Segmento <span class="sort-ico">↕</span></th>
             <th onclick="sortTable('riesgo')">Riesgo <span class="sort-ico">↕</span></th>
+            <th style="width:34px"></th>
           </tr>
         </thead>
         <tbody id="tbl-body"></tbody>
@@ -563,9 +564,19 @@ function initFirebase(){
     dbOnValue(dealsRef, function(snapshot){
       var data = snapshot.val();
       if(!data){
-        var batch = {};
-        RAW.forEach(function(d,i){ batch['deal_'+String(i).padStart(4,'0')] = d; });
-        window._dbSet(dealsRef, batch);
+        if(RAW.length>0){
+          var batch = {};
+          RAW.forEach(function(d,i){ batch['deal_'+String(i).padStart(4,'0')] = d; });
+          window._dbSet(dealsRef, batch);
+        } else {
+          // Base de datos vacía y sin respaldo local: renderizar estado vacío sin reintentar escrituras
+          liveDeals = [];
+          window._liveData = [];
+          populateFilters();
+          applyFilters();
+          if(currentRole==='rep'){ renderRepView(); renderRepTable(); }
+          setSyncStatus('synced');
+        }
       } else {
         liveDeals = Object.entries(data).map(function(e){ return Object.assign({}, e[1], {_key:e[0]}); });
         window._liveData = liveDeals;
@@ -585,6 +596,7 @@ function initFirebase(){
 // ═══════════════════════════════════════════════════════════
 function openOppModal(deal){
   if(typeof deal === 'number') deal = window._tableData && window._tableData[deal];
+  if(deal && !canEdit(deal)){ alert('No tienes permisos para editar esta oportunidad.'); return; }
   _editingKey = (deal && deal._key) ? deal._key : null;
   document.getElementById('modal-title').textContent = deal ? 'Editar Oportunidad' : 'Nueva Oportunidad';
   document.getElementById('btn-delete-opp').style.display = deal ? 'block' : 'none';
@@ -595,7 +607,18 @@ function openOppModal(deal){
   });
   document.getElementById('f-valor').value = deal ? (deal.valor||0) : '';
   document.getElementById('f-prob').value  = deal ? Math.round((deal.prob||0)*100) : '';
-  if(!deal && currentRole==='rep') document.getElementById('f-rep').value = currentRep||'';
+  // Un rep siempre trabaja sobre su propio nombre: campo Rep bloqueado. Gerencia puede reasignar.
+  var repSel = document.getElementById('f-rep');
+  if(currentRole==='rep'){
+    repSel.value = currentRep||'';
+    repSel.disabled = true;
+    repSel.style.opacity = '0.6';
+    repSel.style.cursor = 'not-allowed';
+  } else {
+    repSel.disabled = false;
+    repSel.style.opacity = '';
+    repSel.style.cursor = '';
+  }
   document.getElementById('opp-modal').classList.add('open');
 }
 function closeOppModal(){
@@ -606,6 +629,7 @@ function saveOpp(){
   var oportunidad = document.getElementById('f-oportunidad').value.trim();
   var cuenta      = document.getElementById('f-cuenta').value.trim();
   var rep         = document.getElementById('f-rep').value.trim();
+  if(currentRole==='rep' && currentRep) rep = currentRep; // un rep solo guarda a su propio nombre
   if(!oportunidad||!cuenta||!rep){ alert('Oportunidad, Cuenta y Rep son obligatorios.'); return; }
   var prob  = (parseFloat(document.getElementById('f-prob').value)||0)/100;
   var valor = parseFloat(document.getElementById('f-valor').value)||0;
@@ -937,8 +961,8 @@ function initApp(){
     if(globalFilters) globalFilters.style.display = 'none';
   }
   initFirebase();
-  // Immediate render with local data
-  window._liveData = [];
+  // Immediate render with local data (sin pisar datos si Firebase ya respondió)
+  if(!window._liveData) window._liveData = [];
   applyFilters();
   if(currentRole==='rep'){ renderRepView(); renderRepTable(); }
 }
@@ -1002,7 +1026,28 @@ function getCleanData(){
   var src = (window._liveData && window._liveData.length>0) ? window._liveData : RAW;
   var data = src.filter(function(r){ return r.oportunidad && r.cuenta && r.rep; });
   if(currentRole==='rep' && currentRep) data = data.filter(function(r){ return r.rep===currentRep; });
-  return data;
+  // Normalizar registros: evita NaN / "undefined" si algún campo falta en Firebase
+  return data.map(function(r){
+    var valor = parseFloat(r.valor) || 0;
+    var prob  = parseFloat(r.prob)  || 0;
+    var esp   = (r.esperado!=null && !isNaN(parseFloat(r.esperado))) ? parseFloat(r.esperado) : Math.round(valor*prob);
+    return Object.assign({}, r, {
+      valor: valor, prob: prob, esperado: esp,
+      estado: r.estado || '', tipo: r.tipo || '', canal: r.canal || '',
+      origen: r.origen || '', riesgo: r.riesgo || '',
+      segmento: (r.segmento==null ? '' : String(r.segmento).trim()),
+      mes_inicio: r.mes_inicio || '', mes_radicacion: r.mes_radicacion || '',
+      broker: r.broker || '', motivo_perdida: r.motivo_perdida || '', comentarios: r.comentarios || ''
+    });
+  });
+}
+
+// Permisos de edición: gerencia edita todo; un rep solo sus propias oportunidades
+function canEdit(r){
+  if(!r) return false;
+  if(currentRole==='gerencia') return true;
+  if(currentRole==='rep' && currentRep) return r.rep===currentRep;
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1071,6 +1116,9 @@ function populateFilters(){
   const eSel=document.getElementById('fEstado');
   const oSel=document.getElementById('fOrigen');
   const sgSel=document.getElementById('fSegmento');
+  // Recuerda la selección actual para restaurarla después de reconstruir las opciones
+  // (así los filtros NO se reinician cada vez que Firebase sincroniza o se guarda algo).
+  const prev={rep:rSel.value, estado:eSel.value, origen:oSel.value, segmento:sgSel.value};
   // Deja solo la opción "Todos" (primera) y elimina cualquier opción agregada antes,
   // así populateFilters() es seguro de llamar más de una vez sin duplicar la lista.
   [rSel,eSel,oSel,sgSel].forEach(sel=>{ while(sel.options.length>1) sel.remove(1); });
@@ -1078,6 +1126,11 @@ function populateFilters(){
   estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
   origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
   segmentos.forEach(s=>{const el=document.createElement('option');el.value=s;el.textContent=s;sgSel.appendChild(el);});
+  // Restaurar selección previa si la opción todavía existe
+  if(prev.rep && reps.includes(prev.rep)) rSel.value=prev.rep;
+  if(prev.estado && estados.includes(prev.estado)) eSel.value=prev.estado;
+  if(prev.origen && origenes.includes(prev.origen)) oSel.value=prev.origen;
+  if(prev.segmento && segmentos.includes(prev.segmento)) sgSel.value=prev.segmento;
   document.dispatchEvent(new Event('filtersReady'));
 }
 
@@ -1257,6 +1310,7 @@ function renderTable(activos){
       <td style="color:var(--txt2);font-size:11px">${r.origen}</td>
       <td style="color:var(--txt2);font-size:11px">${r.segmento||'—'}</td>
       <td>${rBadge(r.riesgo)}</td>
+      <td style="padding:6px 4px;width:34px">${canEdit(r)?`<button class="btn-edit-row" title="Editar" onclick="event.stopPropagation();openOppModal(${i})">✏️</button>`:''}</td>
     </tr>`).join('');
   window._tableData=sorted;
 }
@@ -1292,16 +1346,24 @@ function renderGanadasPerdidas(ganados,perdidos,totalGanado,totalPerdido){
 // ═══════════════════════════════════════
 function openModal(i){
   const r=window._tableData?.[i];if(!r)return;
+  window._detailRecord=r;
   document.getElementById('m-title').textContent=r.oportunidad;
   document.getElementById('m-sub').textContent=r.cuenta;
   document.getElementById('m-grid').innerHTML=[
     {l:'Rep',v:r.rep},{l:'Estado',v:badge(r.estado)},
     {l:'Valor',v:fmtFull(r.valor)},{l:'Valor esperado',v:fmtFull(r.esperado)},
-    {l:'Canal',v:r.canal},{l:'Origen',v:r.origen},
-    {l:'Riesgo',v:rBadge(r.riesgo)},{l:'Tipo',v:r.tipo},
-    {l:'Mes inicio',v:r.mes_inicio},{l:'Mes radicación',v:r.mes_radicacion},
-  ].map(f=>`<div class="modal-field"><div class="modal-field-lbl">${f.l}</div><div class="modal-field-val">${f.v}</div></div>`).join('');
+    {l:'Canal',v:r.canal||'—'},{l:'Origen',v:r.origen||'—'},
+    {l:'Riesgo',v:r.riesgo?rBadge(r.riesgo):'—'},{l:'Tipo',v:r.tipo||'—'},
+    {l:'Mes inicio',v:r.mes_inicio||'—'},{l:'Mes radicación',v:r.mes_radicacion||'—'},
+  ].map(f=>`<div class="modal-field"><div class="modal-field-lbl">${f.l}</div><div class="modal-field-val">${f.v}</div></div>`).join('')
+  +(canEdit(r)?`<div class="modal-field" style="grid-column:1/-1;text-align:right"><button class="btn-add-opp" style="display:inline-flex" onclick="editFromDetail()">✏️ Editar</button></div>`:'');
   document.getElementById('modal').classList.add('open');
+}
+function editFromDetail(){
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('side-bg').classList.remove('open');
+  document.getElementById('side-panel').classList.remove('open');
+  if(window._detailRecord && canEdit(window._detailRecord)) openOppModal(window._detailRecord);
 }
 function closeModal(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open');}
 
@@ -1368,15 +1430,17 @@ function openSidePanel(estadoKey, data){
 function openModalFromSide(i, e){
   e.stopPropagation();
   const r = window._sidePanelData?.[i]; if(!r) return;
+  window._detailRecord=r;
   document.getElementById('m-title').textContent = r.oportunidad;
   document.getElementById('m-sub').textContent   = r.cuenta;
   document.getElementById('m-grid').innerHTML = [
     {l:'Rep',v:r.rep},{l:'Estado',v:badge(r.estado)},
     {l:'Valor',v:fmtFull(r.valor)},{l:'Valor esperado',v:fmtFull(r.esperado)},
-    {l:'Canal',v:r.canal},{l:'Origen',v:r.origen},
-    {l:'Riesgo',v:rBadge(r.riesgo)},{l:'Tipo',v:r.tipo},
-    {l:'Mes inicio',v:r.mes_inicio},{l:'Mes radicación',v:r.mes_radicacion},
-  ].map(f=>`<div class="modal-field"><div class="modal-field-lbl">${f.l}</div><div class="modal-field-val">${f.v}</div></div>`).join('');
+    {l:'Canal',v:r.canal||'—'},{l:'Origen',v:r.origen||'—'},
+    {l:'Riesgo',v:r.riesgo?rBadge(r.riesgo):'—'},{l:'Tipo',v:r.tipo||'—'},
+    {l:'Mes inicio',v:r.mes_inicio||'—'},{l:'Mes radicación',v:r.mes_radicacion||'—'},
+  ].map(f=>`<div class="modal-field"><div class="modal-field-lbl">${f.l}</div><div class="modal-field-val">${f.v}</div></div>`).join('')
+  +(canEdit(r)?`<div class="modal-field" style="grid-column:1/-1;text-align:right"><button class="btn-add-opp" style="display:inline-flex" onclick="editFromDetail()">✏️ Editar</button></div>`:'');
   document.getElementById('modal').classList.add('open');
 }
 
@@ -1408,22 +1472,11 @@ applyFilters();
 // After original logic loads, patch applyFilters and init
 (function(){
   _origApplyFilters = applyFilters;
+  // El botón de editar ya se renderiza directamente en renderTable() con control de permisos;
+  // aquí solo refrescamos la tabla del rep cuando cambian los filtros/datos.
   window.applyFilters = function(){
     _origApplyFilters();
-    setTimeout(function(){
-      document.querySelectorAll('#tbl-main tr').forEach(function(tr,i){
-        if(i===0||tr.querySelector('.btn-edit-row')) return;
-        var deal=window._tableData&&window._tableData[i-1];
-        if(!deal) return;
-        var td=document.createElement('td');
-        var btn=document.createElement('button');
-        btn.className='btn-edit-row'; btn.title='Editar'; btn.textContent='✏️';
-        btn.dataset.idx=i-1;
-        btn.addEventListener('click',function(e){ e.stopPropagation(); openOppModal(window._tableData[parseInt(this.dataset.idx)]); });
-        td.appendChild(btn); tr.appendChild(td);
-      });
-      if(currentRole==='rep') renderRepTable();
-    }, 100);
+    if(currentRole==='rep') renderRepTable();
   };
   // Lock rep filter after populate
   if(currentRole==='rep' && currentRep){
