@@ -159,6 +159,24 @@ nav{background:var(--txt);color:#fff;padding:0 20px;display:flex;align-items:cen
 .search-wrap input{width:100%;padding:6px 10px 6px 30px;border:0.5px solid var(--border);border-radius:99px;font-size:12px;background:var(--s2);outline:none;color:var(--txt)}
 .search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px}
 .btn-reset{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;white-space:nowrap;padding:4px 8px}
+/* MULTI-SELECT FILTERS */
+.filter-chip.mf{position:relative;padding:0}
+.filter-chip.mf label{padding-left:12px}
+.mf-btn{display:flex;align-items:center;gap:5px;background:none;border:none;font-size:12px;color:var(--txt);cursor:pointer;outline:none;padding:5px 12px 5px 4px;font-family:inherit;max-width:190px}
+.mf-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+.mf-caret{font-size:9px;color:var(--txt3)}
+.filter-chip.mf.active{border-color:var(--blue);background:#EFF6FF}
+.filter-chip.mf.active .mf-val{color:var(--blue);font-weight:600}
+.filter-chip.mf.locked{opacity:.6}
+.filter-chip.mf.locked .mf-btn{cursor:not-allowed;pointer-events:none}
+.mf-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:190px;max-height:280px;overflow:auto;background:#fff;border:0.5px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.14);padding:6px;z-index:400}
+.mf-panel.open{display:block}
+.mf-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--txt);user-select:none}
+.mf-opt:hover{background:var(--s2)}
+.mf-opt input{cursor:pointer;accent-color:var(--blue)}
+.mf-clear{padding:6px 8px;border-radius:6px;font-size:11px;color:var(--blue);cursor:pointer;font-weight:600;border-bottom:0.5px solid var(--border);margin-bottom:4px}
+.mf-clear:hover{background:#EFF6FF}
+.mf-empty{padding:8px;font-size:11px;color:var(--txt3)}
 
 /* PAGES */
 .page{display:none;padding:20px}
@@ -353,11 +371,11 @@ tr:last-child td{border-bottom:none}
 </nav>
 
 <div class="filters">
-  <div class="filter-chip"><label>Rep</label><select id="fRep" onchange="applyFilters()"><option value="">Todos</option></select></div>
-  <div class="filter-chip"><label>Estado</label><select id="fEstado" onchange="applyFilters()"><option value="">Todos</option></select></div>
-  <div class="filter-chip"><label>Canal</label><select id="fCanal" onchange="applyFilters()"><option value="">Todos</option><option>Directo</option><option>Indirecto</option></select></div>
-  <div class="filter-chip"><label>Origen</label><select id="fOrigen" onchange="applyFilters()"><option value="">Todos</option></select></div>
-  <div class="filter-chip"><label>Segmento</label><select id="fSegmento" onchange="applyFilters()"><option value="">Todos</option></select></div>
+  <div class="filter-chip mf" id="mf-chip-rep"><label>Rep</label><button class="mf-btn" type="button" onclick="toggleMfPanel('rep',event)"><span class="mf-val" id="mf-val-rep">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-rep" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-estado"><label>Estado</label><button class="mf-btn" type="button" onclick="toggleMfPanel('estado',event)"><span class="mf-val" id="mf-val-estado">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-estado" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-canal"><label>Canal</label><button class="mf-btn" type="button" onclick="toggleMfPanel('canal',event)"><span class="mf-val" id="mf-val-canal">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-canal" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-origen"><label>Origen</label><button class="mf-btn" type="button" onclick="toggleMfPanel('origen',event)"><span class="mf-val" id="mf-val-origen">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-origen" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-segmento"><label>Segmento</label><button class="mf-btn" type="button" onclick="toggleMfPanel('segmento',event)"><span class="mf-val" id="mf-val-segmento">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-segmento" onclick="event.stopPropagation()"></div></div>
   <div class="search-wrap"><input id="search" placeholder="Buscar cuenta u oportunidad…" oninput="applyFilters()"></div>
   <button class="btn-reset" onclick="resetFilters()">Limpiar</button>
   <span id="filterCount" style="font-size:11px;color:var(--txt3)"></span>
@@ -952,10 +970,7 @@ function initApp(){
       document.querySelectorAll('.nav-tab').forEach(function(t){ if(t.id!=='tab-repview') t.classList.remove('active'); });
     }
     // Lock Rep filter
-    document.addEventListener('filtersReady', function(){
-      var rSel=document.getElementById('fRep');
-      if(rSel && currentRep){ rSel.value=currentRep; rSel.disabled=true; rSel.style.opacity='0.6'; rSel.style.cursor='not-allowed'; }
-    });
+    document.addEventListener('filtersReady', lockRepFilter);
     // Mi Pipeline es la vista inicial del rep: la barra de filtros global no aplica ahí
     var globalFilters = document.querySelector('.filters');
     if(globalFilters) globalFilters.style.display = 'none';
@@ -1105,49 +1120,102 @@ let filtered=[];
 let sortKey='valor', sortDir=-1;
 let charts={};
 
+// ═══════════════════════════════════════
+//  MULTI-SELECT FILTERS
+//  Dentro de un mismo filtro los valores marcados se suman (OR);
+//  entre filtros distintos se combinan (AND). Vacío = "Todos".
+// ═══════════════════════════════════════
+const filterSel = {rep:new Set(), estado:new Set(), canal:new Set(), origen:new Set(), segmento:new Set()};
+let filterOptions = {rep:[], estado:[], canal:[], origen:[], segmento:[]};
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toggleMfPanel(key, e){
+  if(e) e.stopPropagation();
+  document.querySelectorAll('.mf-panel').forEach(p=>{ if(p.id!=='mf-panel-'+key) p.classList.remove('open'); });
+  const panel=document.getElementById('mf-panel-'+key);
+  if(panel) panel.classList.toggle('open');
+}
+document.addEventListener('click', ()=>document.querySelectorAll('.mf-panel').forEach(p=>p.classList.remove('open')));
+
+function buildMfPanel(key){
+  const panel=document.getElementById('mf-panel-'+key);
+  if(!panel) return;
+  const opts=filterOptions[key]||[];
+  panel.innerHTML='<div class="mf-clear" data-key="'+key+'">✕ Todos (quitar selección)</div>'
+    +(opts.length===0 ? '<div class="mf-empty">Sin opciones</div>'
+      : opts.map(v=>'<label class="mf-opt"><input type="checkbox" data-key="'+key+'" data-val="'+escHtml(v)+'"'+(filterSel[key].has(v)?' checked':'')+'><span>'+escHtml(v)+'</span></label>').join(''));
+  panel.querySelector('.mf-clear').addEventListener('click', function(){ clearMf(this.dataset.key); });
+  panel.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', function(){ toggleMfValue(this.dataset.key, this.dataset.val); });
+  });
+}
+
+function toggleMfValue(key, val){
+  const s=filterSel[key];
+  if(s.has(val)) s.delete(val); else s.add(val);
+  updateFilterLabels();
+  applyFilters();
+}
+
+function clearMf(key){
+  filterSel[key].clear();
+  buildMfPanel(key);
+  updateFilterLabels();
+  applyFilters();
+}
+
+function updateFilterLabels(){
+  Object.keys(filterSel).forEach(key=>{
+    const s=filterSel[key];
+    const el=document.getElementById('mf-val-'+key);
+    const chip=document.getElementById('mf-chip-'+key);
+    if(!el||!chip) return;
+    if(s.size===0) el.textContent='Todos';
+    else if(s.size===1) el.textContent=[...s][0];
+    else el.textContent=s.size+' seleccionados';
+    chip.classList.toggle('active', s.size>0);
+  });
+}
+
+// Bloquea el filtro Rep para que un rep solo se vea a sí mismo
+function lockRepFilter(){
+  if(currentRole!=='rep'||!currentRep) return;
+  filterSel.rep = new Set([currentRep]);
+  const chip=document.getElementById('mf-chip-rep');
+  if(chip) chip.classList.add('locked');
+  updateFilterLabels();
+}
+
 function populateFilters(){
   const data=getCleanData();
   const norm=v=>(v==null?'':String(v).trim());
-  const reps=[...new Set(data.map(r=>norm(r.rep)))].filter(Boolean).sort();
-  const estados=[...new Set(data.map(r=>norm(r.estado)))].filter(Boolean).sort();
-  const origenes=[...new Set(data.map(r=>norm(r.origen)))].filter(Boolean).sort();
-  const segmentos=[...new Set(data.map(r=>norm(r.segmento)))].filter(Boolean).sort();
-  const rSel=document.getElementById('fRep');
-  const eSel=document.getElementById('fEstado');
-  const oSel=document.getElementById('fOrigen');
-  const sgSel=document.getElementById('fSegmento');
-  // Recuerda la selección actual para restaurarla después de reconstruir las opciones
-  // (así los filtros NO se reinician cada vez que Firebase sincroniza o se guarda algo).
-  const prev={rep:rSel.value, estado:eSel.value, origen:oSel.value, segmento:sgSel.value};
-  // Deja solo la opción "Todos" (primera) y elimina cualquier opción agregada antes,
-  // así populateFilters() es seguro de llamar más de una vez sin duplicar la lista.
-  [rSel,eSel,oSel,sgSel].forEach(sel=>{ while(sel.options.length>1) sel.remove(1); });
-  reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rSel.appendChild(o);});
-  estados.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;eSel.appendChild(o);});
-  origenes.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;oSel.appendChild(el);});
-  segmentos.forEach(s=>{const el=document.createElement('option');el.value=s;el.textContent=s;sgSel.appendChild(el);});
-  // Restaurar selección previa si la opción todavía existe
-  if(prev.rep && reps.includes(prev.rep)) rSel.value=prev.rep;
-  if(prev.estado && estados.includes(prev.estado)) eSel.value=prev.estado;
-  if(prev.origen && origenes.includes(prev.origen)) oSel.value=prev.origen;
-  if(prev.segmento && segmentos.includes(prev.segmento)) sgSel.value=prev.segmento;
+  const uniq=f=>[...new Set(data.map(r=>norm(r[f])))].filter(Boolean).sort();
+  filterOptions.rep=uniq('rep');
+  filterOptions.estado=uniq('estado');
+  filterOptions.canal=[...new Set(['Directo','Indirecto'].concat(uniq('canal')))];
+  filterOptions.origen=uniq('origen');
+  filterOptions.segmento=uniq('segmento');
+  // Elimina selecciones cuyo valor ya no existe en los datos (excepto el rep bloqueado)
+  Object.keys(filterSel).forEach(key=>{
+    if(key==='rep'&&currentRole==='rep') return;
+    [...filterSel[key]].forEach(v=>{ if(!filterOptions[key].includes(v)) filterSel[key].delete(v); });
+  });
+  Object.keys(filterSel).forEach(buildMfPanel);
+  updateFilterLabels();
   document.dispatchEvent(new Event('filtersReady'));
 }
 
 function applyFilters(){
-  const rep=document.getElementById('fRep').value;
-  const estado=document.getElementById('fEstado').value;
-  const canal=document.getElementById('fCanal').value;
-  const origen=document.getElementById('fOrigen').value;
-  const segmento=document.getElementById('fSegmento').value;
   const q=document.getElementById('search').value.toLowerCase();
   const data=getCleanData();
+  const m=(key,val)=>filterSel[key].size===0||filterSel[key].has(val);
   filtered=data.filter(r=>
-    (!rep||r.rep===rep)&&
-    (!estado||r.estado===estado)&&
-    (!canal||r.canal===canal)&&
-    (!origen||r.origen===origen)&&
-    (!segmento||r.segmento===segmento)&&
+    m('rep',r.rep)&&
+    m('estado',r.estado)&&
+    m('canal',r.canal)&&
+    m('origen',r.origen)&&
+    m('segmento',r.segmento)&&
     (!q||(r.oportunidad+r.cuenta).toLowerCase().includes(q))
   );
   document.getElementById('filterCount').textContent=filtered.length!==data.length?`${filtered.length} de ${data.length} registros`:'';
@@ -1155,15 +1223,21 @@ function applyFilters(){
 }
 
 function resetFilters(){
-  ['fRep','fEstado','fCanal','fOrigen','fSegmento'].forEach(id=>document.getElementById(id).value='');
+  Object.keys(filterSel).forEach(key=>{
+    if(key==='rep'&&currentRole==='rep'&&currentRep){ filterSel.rep=new Set([currentRep]); return; }
+    filterSel[key].clear();
+  });
   document.getElementById('search').value='';
+  Object.keys(filterSel).forEach(buildMfPanel);
+  updateFilterLabels();
   applyFilters();
 }
 
 function goToRepDetail(rep){
-  const rSel=document.getElementById('fRep');
-  if(rSel.disabled) return; // un rep no debe poder ver el detalle de otro
-  rSel.value=rep;
+  if(currentRole==='rep') return; // un rep no debe poder ver el detalle de otro
+  filterSel.rep=new Set([rep]);
+  buildMfPanel('rep');
+  updateFilterLabels();
   applyFilters();
   const pipelineBtn=Array.from(document.querySelectorAll('.nav-tab')).find(b=>b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'pipeline'"));
   if(pipelineBtn) showPage('pipeline',pipelineBtn);
@@ -1479,10 +1553,7 @@ applyFilters();
     if(currentRole==='rep') renderRepTable();
   };
   // Lock rep filter after populate
-  if(currentRole==='rep' && currentRep){
-    var rSel=document.getElementById('fRep');
-    if(rSel){ rSel.value=currentRep; rSel.disabled=true; rSel.style.opacity='0.6'; rSel.style.cursor='not-allowed'; }
-  }
+  lockRepFilter();
   // Render quota bars
   renderQuotaBars();
 })();
