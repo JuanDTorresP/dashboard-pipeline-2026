@@ -376,6 +376,9 @@ tr:last-child td{border-bottom:none}
   <div class="filter-chip mf" id="mf-chip-canal"><label>Canal</label><button class="mf-btn" type="button" onclick="toggleMfPanel('canal',event)"><span class="mf-val" id="mf-val-canal">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-canal" onclick="event.stopPropagation()"></div></div>
   <div class="filter-chip mf" id="mf-chip-origen"><label>Origen</label><button class="mf-btn" type="button" onclick="toggleMfPanel('origen',event)"><span class="mf-val" id="mf-val-origen">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-origen" onclick="event.stopPropagation()"></div></div>
   <div class="filter-chip mf" id="mf-chip-segmento"><label>Segmento</label><button class="mf-btn" type="button" onclick="toggleMfPanel('segmento',event)"><span class="mf-val" id="mf-val-segmento">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-segmento" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-anio_inicio"><label>Año inicio</label><button class="mf-btn" type="button" onclick="toggleMfPanel('anio_inicio',event)"><span class="mf-val" id="mf-val-anio_inicio">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_inicio" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-anio_radicacion"><label>Año radicación</label><button class="mf-btn" type="button" onclick="toggleMfPanel('anio_radicacion',event)"><span class="mf-val" id="mf-val-anio_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_radicacion" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-mes_radicacion"><label>Mes radicación</label><button class="mf-btn" type="button" onclick="toggleMfPanel('mes_radicacion',event)"><span class="mf-val" id="mf-val-mes_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-mes_radicacion" onclick="event.stopPropagation()"></div></div>
   <div class="search-wrap"><input id="search" placeholder="Buscar cuenta u oportunidad…" oninput="applyFilters()"></div>
   <button class="btn-reset" onclick="resetFilters()">Limpiar</button>
   <span id="filterCount" style="font-size:11px;color:var(--txt3)"></span>
@@ -1125,8 +1128,8 @@ let charts={};
 //  Dentro de un mismo filtro los valores marcados se suman (OR);
 //  entre filtros distintos se combinan (AND). Vacío = "Todos".
 // ═══════════════════════════════════════
-const filterSel = {rep:new Set(), estado:new Set(), canal:new Set(), origen:new Set(), segmento:new Set()};
-let filterOptions = {rep:[], estado:[], canal:[], origen:[], segmento:[]};
+const filterSel = {rep:new Set(), estado:new Set(), canal:new Set(), origen:new Set(), segmento:new Set(), anio_inicio:new Set(), anio_radicacion:new Set(), mes_radicacion:new Set()};
+let filterOptions = {rep:[], estado:[], canal:[], origen:[], segmento:[], anio_inicio:[], anio_radicacion:[], mes_radicacion:[]};
 
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -1196,6 +1199,14 @@ function populateFilters(){
   filterOptions.canal=[...new Set(['Directo','Indirecto'].concat(uniq('canal')))];
   filterOptions.origen=uniq('origen');
   filterOptions.segmento=uniq('segmento');
+  // Filtros agregados: año inicio, año radicación (orden numérico) y mes radicación (orden calendario)
+  filterOptions.anio_inicio=uniq('anio_inicio').sort((a,b)=>Number(a)-Number(b));
+  filterOptions.anio_radicacion=uniq('anio_radicacion').sort((a,b)=>Number(a)-Number(b));
+  const MESES_ORD=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  filterOptions.mes_radicacion=uniq('mes_radicacion').sort((a,b)=>{
+    const ia=MESES_ORD.indexOf(String(a).toLowerCase()), ib=MESES_ORD.indexOf(String(b).toLowerCase());
+    return (ia===-1?99:ia)-(ib===-1?99:ib);
+  });
   // Elimina selecciones cuyo valor ya no existe en los datos (excepto el rep bloqueado)
   Object.keys(filterSel).forEach(key=>{
     if(key==='rep'&&currentRole==='rep') return;
@@ -1216,6 +1227,9 @@ function applyFilters(){
     m('canal',r.canal)&&
     m('origen',r.origen)&&
     m('segmento',r.segmento)&&
+    m('anio_inicio',(r.anio_inicio==null?'':String(r.anio_inicio).trim()))&&
+    m('anio_radicacion',(r.anio_radicacion==null?'':String(r.anio_radicacion).trim()))&&
+    m('mes_radicacion',(r.mes_radicacion==null?'':String(r.mes_radicacion).trim()))&&
     (!q||(r.oportunidad+r.cuenta).toLowerCase().includes(q))
   );
   document.getElementById('filterCount').textContent=filtered.length!==data.length?`${filtered.length} de ${data.length} registros`:'';
