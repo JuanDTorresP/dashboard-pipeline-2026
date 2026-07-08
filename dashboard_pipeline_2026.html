@@ -279,12 +279,42 @@ tr:last-child td{border-bottom:none}
   .g2,.g3{grid-template-columns:1fr}
   .page{padding:12px}
   .m-val{font-size:20px}
-  .filters{padding:8px 12px}
-  nav{padding:0 12px}
-  .modal-grid{grid-template-columns:1fr}
+  /* Nav compacta */
+  nav{padding:0 10px;height:48px}
+  .nav-brand{font-size:13px;margin-right:10px}
+  .nav-date{display:none}
+  /* Filtros: una sola fila con scroll horizontal */
+  .filters{padding:8px 10px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:8px;top:48px}
+  .filters::-webkit-scrollbar{display:none}
+  .filter-chip,.btn-reset,#filterCount{flex-shrink:0}
+  .search-wrap{min-width:160px;max-width:200px;flex-shrink:0}
+  /* Paneles de filtro fijos al viewport para que no los recorte el scroll */
+  .mf-panel{position:fixed;left:12px;right:12px;top:100px;min-width:auto;max-height:55vh;z-index:600}
+  /* Modales y formularios a una columna */
+  .modal-grid,.form-grid{grid-template-columns:1fr}
+  .modal-box,.modal{max-height:94vh}
+  .modal-footer{flex-wrap:wrap}
+  /* Embudo más compacto */
+  .funnel-label{width:74px;font-size:11px}
+  .funnel-count{width:46px;font-size:10px}
+  /* Tablas: scroll suave y columnas legibles */
+  .tbl-wrap{-webkit-overflow-scrolling:touch;margin-left:-16px;margin-right:-16px;padding:0 16px}
+  #mainTable{min-width:760px}
+  th,td{padding:6px 8px}
+  /* Hero del vendedor */
+  .rep-hero{padding:18px}
+  .rep-hero-name{font-size:18px}
+  /* Evitar zoom automático de iOS al enfocar campos */
+  .form-input,.form-select,.search-wrap input,.login-field,.login-input{font-size:16px}
 }
 @media(max-width:480px){
-  .m-grid{grid-template-columns:1fr 1fr}
+  .m-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .m-card{padding:12px}
+  .rep-metrics{grid-template-columns:1fr 1fr}
+  .quota-detail-grid{grid-template-columns:1fr}
+  .modal{padding:20px 16px}
+  .modal-body{padding:16px}
+  .quota-rep-nums{gap:8px;font-size:10px}
 }
 
 </style>
@@ -1366,7 +1396,7 @@ function renderVendedor(activos,ganados){
   });
 
   // Rep donut
-  mkChart('ch-repdonut',{type:'doughnut',data:{labels:repData.map(d=>d.rep),datasets:[{data:repData.map(d=>d.activo),backgroundColor:repData.map(d=>getAv(d.rep).bg),borderColor:repData.map(d=>getAv(d.rep).cl),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}}}});
+  mkChart('ch-repdonut',{type:'doughnut',data:{labels:repData.map(d=>d.rep),datasets:[{data:repData.map(d=>d.activo),backgroundColor:repData.map(d=>getAv(d.rep).bg),borderColor:repData.map(d=>getAv(d.rep).cl),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:window.innerWidth<640?'bottom':'right',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}}}});
 
   // Rep grouped bar
   mkChart('ch-repbars',{type:'bar',data:{labels:repData.map(d=>d.rep),datasets:[{label:'Activo',data:repData.map(d=>d.activo),backgroundColor:'#2563EB',borderRadius:3},{label:'Ganado',data:repData.map(d=>d.ganado),backgroundColor:'#16a34a',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtFull(c.raw)}`}}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,.05)'}}}}});
