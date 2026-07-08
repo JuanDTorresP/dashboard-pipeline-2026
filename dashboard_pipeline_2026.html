@@ -160,18 +160,28 @@ nav{background:var(--txt);color:#fff;padding:0 20px;display:flex;align-items:cen
 .search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px}
 .btn-reset{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;white-space:nowrap;padding:4px 8px}
 /* MULTI-SELECT FILTERS */
-.filter-chip.mf{position:relative;padding:0}
-.filter-chip.mf label{padding-left:12px}
-.mf-btn{display:flex;align-items:center;gap:5px;background:none;border:none;font-size:12px;color:var(--txt);cursor:pointer;outline:none;padding:5px 12px 5px 4px;font-family:inherit;max-width:190px}
+.filter-chip.mf{position:relative;padding:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.filter-chip.mf label{padding-left:12px;cursor:pointer;pointer-events:none}
+.mf-btn{display:flex;align-items:center;gap:5px;background:none;border:none;font-size:12px;color:var(--txt);cursor:pointer;outline:none;padding:5px 12px 5px 4px;font-family:inherit;max-width:190px;pointer-events:none}
 .mf-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
 .mf-caret{font-size:9px;color:var(--txt3)}
 .filter-chip.mf.active{border-color:var(--blue);background:#EFF6FF}
 .filter-chip.mf.active .mf-val{color:var(--blue);font-weight:600}
-.filter-chip.mf.locked{opacity:.6}
-.filter-chip.mf.locked .mf-btn{cursor:not-allowed;pointer-events:none}
-.mf-panel{display:none;position:fixed;min-width:190px;max-height:280px;overflow:auto;background:#fff;border:0.5px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.14);padding:6px;z-index:700}
+.filter-chip.mf.locked{opacity:.6;pointer-events:none}
+.filter-chip.mf.locked .mf-btn{cursor:not-allowed}
+.mf-backdrop{display:none;position:fixed;inset:0;z-index:690;background:transparent}
+.mf-backdrop.open{display:block}
+.mf-panel{display:none;position:fixed;min-width:190px;max-height:280px;overflow:auto;-webkit-overflow-scrolling:touch;background:#fff;border:0.5px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.14);padding:6px;z-index:700;overscroll-behavior:contain}
 .mf-panel.open{display:block}
-.mf-opt{display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--txt);user-select:none;-webkit-tap-highlight-color:transparent}
+.mf-hdr{display:none}
+.mf-panel.sheet{border-radius:16px 16px 0 0;border:none;box-shadow:0 -8px 30px rgba(0,0,0,0.25);padding:0 8px calc(10px + env(safe-area-inset-bottom))}
+.mf-panel.sheet .mf-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 8px 10px;border-bottom:.5px solid var(--border);position:sticky;top:0;background:#fff;z-index:1;margin-bottom:4px}
+.mf-hdr-title{font-size:14px;font-weight:700;color:var(--txt)}
+.mf-done{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.mf-panel.sheet .mf-opt{padding:12px 8px;font-size:14px}
+.mf-panel.sheet .mf-opt input{width:18px;height:18px}
+.mf-panel.sheet .mf-clear{padding:12px 8px;font-size:13px}
+.mf-opt{display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--txt);user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .mf-opt:hover{background:var(--s2)}
 .mf-opt input{cursor:pointer;accent-color:var(--blue)}
 .mf-clear{padding:6px 8px;border-radius:6px;font-size:11px;color:var(--blue);cursor:pointer;font-weight:600;border-bottom:0.5px solid var(--border);margin-bottom:4px}
@@ -288,6 +298,8 @@ tr:last-child td{border-bottom:none}
   .filters::-webkit-scrollbar{display:none}
   .filter-chip,.btn-reset,#filterCount{flex-shrink:0}
   .search-wrap{min-width:160px;max-width:200px;flex-shrink:0}
+  /* Fondo oscuro cuando un filtro está abierto */
+  .mf-backdrop{background:rgba(0,0,0,.4)}
   /* Modales y formularios a una columna */
   .modal-grid,.form-grid{grid-template-columns:1fr}
   .modal-box,.modal{max-height:94vh}
@@ -399,14 +411,14 @@ tr:last-child td{border-bottom:none}
 </nav>
 
 <div class="filters">
-  <div class="filter-chip mf" id="mf-chip-rep"><label>Rep</label><button class="mf-btn" type="button" onclick="toggleMfPanel('rep',event)"><span class="mf-val" id="mf-val-rep">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-rep" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-estado"><label>Estado</label><button class="mf-btn" type="button" onclick="toggleMfPanel('estado',event)"><span class="mf-val" id="mf-val-estado">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-estado" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-canal"><label>Canal</label><button class="mf-btn" type="button" onclick="toggleMfPanel('canal',event)"><span class="mf-val" id="mf-val-canal">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-canal" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-origen"><label>Origen</label><button class="mf-btn" type="button" onclick="toggleMfPanel('origen',event)"><span class="mf-val" id="mf-val-origen">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-origen" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-segmento"><label>Segmento</label><button class="mf-btn" type="button" onclick="toggleMfPanel('segmento',event)"><span class="mf-val" id="mf-val-segmento">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-segmento" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-anio_inicio"><label>Año inicio</label><button class="mf-btn" type="button" onclick="toggleMfPanel('anio_inicio',event)"><span class="mf-val" id="mf-val-anio_inicio">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_inicio" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-anio_radicacion"><label>Año radicación</label><button class="mf-btn" type="button" onclick="toggleMfPanel('anio_radicacion',event)"><span class="mf-val" id="mf-val-anio_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_radicacion" onclick="event.stopPropagation()"></div></div>
-  <div class="filter-chip mf" id="mf-chip-mes_radicacion"><label>Mes radicación</label><button class="mf-btn" type="button" onclick="toggleMfPanel('mes_radicacion',event)"><span class="mf-val" id="mf-val-mes_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-mes_radicacion" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-rep" onclick="toggleMfPanel('rep',event)"><label>Rep</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-rep">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-rep" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-estado" onclick="toggleMfPanel('estado',event)"><label>Estado</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-estado">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-estado" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-canal" onclick="toggleMfPanel('canal',event)"><label>Canal</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-canal">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-canal" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-origen" onclick="toggleMfPanel('origen',event)"><label>Origen</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-origen">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-origen" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-segmento" onclick="toggleMfPanel('segmento',event)"><label>Segmento</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-segmento">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-segmento" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-anio_inicio" onclick="toggleMfPanel('anio_inicio',event)"><label>Año inicio</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-anio_inicio">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_inicio" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-anio_radicacion" onclick="toggleMfPanel('anio_radicacion',event)"><label>Año radicación</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-anio_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-anio_radicacion" onclick="event.stopPropagation()"></div></div>
+  <div class="filter-chip mf" id="mf-chip-mes_radicacion" onclick="toggleMfPanel('mes_radicacion',event)"><label>Mes radicación</label><button class="mf-btn" type="button" tabindex="-1"><span class="mf-val" id="mf-val-mes_radicacion">Todos</span><span class="mf-caret">▾</span></button><div class="mf-panel" id="mf-panel-mes_radicacion" onclick="event.stopPropagation()"></div></div>
   <div class="search-wrap"><input id="search" placeholder="Buscar cuenta u oportunidad…" oninput="applyFilters()"></div>
   <button class="btn-reset" onclick="resetFilters()">Limpiar</button>
   <span id="filterCount" style="font-size:11px;color:var(--txt3)"></span>
@@ -1161,6 +1173,19 @@ let filterOptions = {rep:[], estado:[], canal:[], origen:[], segmento:[], anio_i
 
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function isMobileVw(){ return window.innerWidth<=768; }
+
+function getMfBackdrop(){
+  let b=document.getElementById('mf-backdrop');
+  if(!b){
+    b=document.createElement('div');
+    b.id='mf-backdrop'; b.className='mf-backdrop';
+    b.addEventListener('click', function(ev){ ev.stopPropagation(); closeAllMfPanels(); });
+    document.body.appendChild(b);
+  }
+  return b;
+}
+
 function toggleMfPanel(key, e){
   if(e) e.stopPropagation();
   document.querySelectorAll('.mf-panel').forEach(p=>{ if(p.id!=='mf-panel-'+key) p.classList.remove('open'); });
@@ -1170,7 +1195,8 @@ function toggleMfPanel(key, e){
   // con scroll horizontal no lo recorte (necesario en móvil)
   if(panel.parentElement!==document.body) document.body.appendChild(panel);
   const willOpen=!panel.classList.contains('open');
-  panel.classList.toggle('open');
+  panel.classList.toggle('open', willOpen);
+  getMfBackdrop().classList.toggle('open', willOpen);
   if(willOpen) positionMfPanel(key);
 }
 
@@ -1178,40 +1204,55 @@ function positionMfPanel(key){
   const panel=document.getElementById('mf-panel-'+key);
   const chip=document.getElementById('mf-chip-'+key);
   if(!panel||!chip) return;
-  const r=chip.getBoundingClientRect();
-  const vw=window.innerWidth, vh=window.innerHeight;
-  const top=Math.round(r.bottom+6);
-  panel.style.top=top+'px';
-  panel.style.maxHeight=Math.max(160, vh-top-16)+'px';
-  if(vw<=768){
-    // En celular: panel a lo ancho de la pantalla, debajo del chip
-    panel.style.left='12px';
-    panel.style.right='12px';
-    panel.style.minWidth='0';
+  if(isMobileVw()){
+    // En celular: hoja inferior a lo ancho de la pantalla
+    panel.classList.add('sheet');
+    panel.style.left='0'; panel.style.right='0';
+    panel.style.top='auto'; panel.style.bottom='0';
+    panel.style.minWidth='0'; panel.style.maxHeight='70vh';
+    panel.scrollTop=0;
   }else{
-    panel.style.right='auto';
+    // En escritorio: desplegable junto al chip
+    panel.classList.remove('sheet');
+    const r=chip.getBoundingClientRect();
+    const vw=window.innerWidth, vh=window.innerHeight;
+    const top=Math.round(r.bottom+6);
+    panel.style.bottom='auto'; panel.style.right='auto';
+    panel.style.top=top+'px';
+    panel.style.maxHeight=Math.max(160, vh-top-16)+'px';
     panel.style.minWidth='190px';
     const pw=Math.max(190, panel.offsetWidth);
     panel.style.left=Math.round(Math.min(Math.max(8, r.left), vw-pw-8))+'px';
   }
 }
 
-function closeAllMfPanels(){ document.querySelectorAll('.mf-panel').forEach(p=>p.classList.remove('open')); }
+function closeAllMfPanels(){
+  document.querySelectorAll('.mf-panel').forEach(p=>p.classList.remove('open'));
+  const b=document.getElementById('mf-backdrop');
+  if(b) b.classList.remove('open');
+}
 document.addEventListener('click', closeAllMfPanels);
-// Cerrar si se hace scroll fuera del panel (evita que quede "flotando" desubicado)
+// En escritorio, cerrar si se hace scroll de la página (evita paneles "flotando");
+// en móvil el backdrop bloquea el fondo, así que no hace falta
 document.addEventListener('scroll', function(ev){
-  if(ev.target && ev.target.classList && ev.target.classList.contains('mf-panel')) return;
+  if(isMobileVw()) return;
+  const t=ev.target;
+  if(t && t.nodeType===1 && (t.classList.contains('mf-panel')||t.closest('.mf-panel'))) return;
   closeAllMfPanels();
 }, true);
-window.addEventListener('resize', closeAllMfPanels);
+window.addEventListener('orientationchange', closeAllMfPanels);
 
 function buildMfPanel(key){
   const panel=document.getElementById('mf-panel-'+key);
   if(!panel) return;
   const opts=filterOptions[key]||[];
-  panel.innerHTML='<div class="mf-clear" data-key="'+key+'">✕ Todos (quitar selección)</div>'
+  const chipLbl=document.querySelector('#mf-chip-'+key+' label');
+  const title=chipLbl?chipLbl.textContent:'Filtro';
+  panel.innerHTML='<div class="mf-hdr"><span class="mf-hdr-title">'+escHtml(title)+'</span><button class="mf-done" type="button">Listo</button></div>'
+    +'<div class="mf-clear" data-key="'+key+'">✕ Todos (quitar selección)</div>'
     +(opts.length===0 ? '<div class="mf-empty">Sin opciones</div>'
       : opts.map(v=>'<label class="mf-opt"><input type="checkbox" data-key="'+key+'" data-val="'+escHtml(v)+'"'+(filterSel[key].has(v)?' checked':'')+'><span>'+escHtml(v)+'</span></label>').join(''));
+  panel.querySelector('.mf-done').addEventListener('click', function(ev){ ev.stopPropagation(); closeAllMfPanels(); });
   panel.querySelector('.mf-clear').addEventListener('click', function(){ clearMf(this.dataset.key); });
   panel.querySelectorAll('input[type=checkbox]').forEach(cb=>{
     cb.addEventListener('change', function(){ toggleMfValue(this.dataset.key, this.dataset.val); });
