@@ -382,6 +382,9 @@ tr:last-child td{border-bottom:none}
         <div class="form-group"><label class="form-label">Mes Radicación</label>
           <select class="form-select" id="f-mes_radicacion"><option value="">-</option><option>Definir</option><option>enero</option><option>febrero</option><option>marzo</option><option>abril</option><option>mayo</option><option>junio</option><option>julio</option><option>agosto</option><option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option></select>
         </div>
+        <div class="form-group"><label class="form-label">Año Radicación</label>
+          <select class="form-select" id="f-anio_radicacion"></select>
+        </div>
         <div class="form-group"><label class="form-label">Broker</label><input class="form-input" id="f-broker" placeholder="Nombre del broker"/></div>
         <div class="form-group"><label class="form-label">Motivo Pérdida</label>
           <select class="form-select" id="f-motivo_perdida"><option value=""></option><option>Precio</option><option>Producto</option><option>Diseño</option><option>Otra area</option><option>tiempos</option><option>Garantia</option><option>Otros</option></select>
@@ -668,6 +671,21 @@ function openOppModal(deal){
   });
   document.getElementById('f-valor').value = deal ? (deal.valor||0) : '';
   document.getElementById('f-prob').value  = deal ? Math.round((deal.prob||0)*100) : '';
+  // Año de radicación: por defecto el año en curso al crear; al editar, el año guardado
+  var anioSel = document.getElementById('f-anio_radicacion');
+  if(anioSel){
+    if(anioSel.options.length===0){
+      var yNow = new Date().getFullYear();
+      for(var y=2024; y<=yNow+3; y++){
+        var op=document.createElement('option'); op.value=String(y); op.textContent=String(y); anioSel.appendChild(op);
+      }
+    }
+    var anioVal = (deal && deal.anio_radicacion) ? String(deal.anio_radicacion) : String(new Date().getFullYear());
+    var exists=false;
+    for(var i=0;i<anioSel.options.length;i++){ if(anioSel.options[i].value===anioVal){ exists=true; break; } }
+    if(!exists){ var opx=document.createElement('option'); opx.value=anioVal; opx.textContent=anioVal; anioSel.appendChild(opx); }
+    anioSel.value = anioVal;
+  }
   // Un rep siempre trabaja sobre su propio nombre: campo Rep bloqueado. Gerencia puede reasignar.
   var repSel = document.getElementById('f-rep');
   if(currentRole==='rep'){
@@ -708,7 +726,8 @@ function saveOpp(){
     broker:document.getElementById('f-broker').value,
     motivo_perdida:document.getElementById('f-motivo_perdida').value,
     comentarios:document.getElementById('f-comentarios').value,
-    anio_inicio:2026, anio_radicacion:2026
+    anio_inicio:2026,
+    anio_radicacion:(parseInt(document.getElementById('f-anio_radicacion').value,10) || new Date().getFullYear())
   };
   setSyncStatus('syncing');
   var db=window._db, dbRef=window._dbRef;
