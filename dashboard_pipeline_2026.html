@@ -1403,7 +1403,8 @@ function render(){
   const totalEsp=activos.reduce((a,r)=>a+r.esperado,0);
   const totalGanado=ganados.reduce((a,r)=>a+r.valor,0);
   const totalPerdido=perdidos.reduce((a,r)=>a+r.valor,0);
-  const fPct=Math.round(VALOR_ESP_AÑO/CUOTA*100*10)/10;
+  // Forecast en vivo: (ganado + valor esperado del pipeline activo) / cuota
+  const fPct=Math.round((totalGanado+totalEsp)/CUOTA*100*10)/10;
 
   renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanado,totalPerdido,fPct);
   renderVendedor(activos,ganados);
@@ -1419,12 +1420,12 @@ function renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanad
     <div class="m-card clickable" onclick="openSidePanel('activo',filtered)" title="Ver pipeline activo"><div class="m-lbl">Valor esperado</div><div class="m-val">${fmt(totalEsp)}</div><div class="m-sub">ponderado por prob.</div></div>
     <div class="m-card clickable" onclick="openSidePanel('Ganado',filtered)" title="Ver oportunidades ganadas"><div class="m-lbl">Ganado 2026</div><div class="m-val" style="color:var(--green)">${fmt(totalGanado)}</div><div class="m-sub">${ganados.length} oportunidades ↗</div></div>
     <div class="m-card"><div class="m-lbl">Cuota Bogotá</div><div class="m-val">${fmt(CUOTA)}</div><div class="m-sub">meta anual</div></div>
-    <div class="m-card"><div class="m-lbl">Forecast</div><div class="m-val" style="color:${fPct>=100?'var(--green)':fPct>=80?'var(--amber)':'var(--red)'}">${fPct}%</div><div class="m-sub">val.esp / cuota</div></div>
+    <div class="m-card"><div class="m-lbl">Forecast</div><div class="m-val" style="color:${fPct>=100?'var(--green)':fPct>=80?'var(--amber)':'var(--red)'}">${fPct}%</div><div class="m-sub">(ganado + val.esp) / cuota</div></div>
     <div class="m-card clickable" onclick="openSidePanel('Perdido',filtered)" title="Ver oportunidades perdidas"><div class="m-lbl">Perdido</div><div class="m-val" style="color:var(--red)">${fmt(totalPerdido)}</div><div class="m-sub">${perdidos.length} oportunidades ↗</div></div>
   `;
 
   // Forecast donut
-  mkChart('ch-forecast',{type:'doughnut',data:{datasets:[{data:[Math.min(fPct,100),Math.max(100-fPct,0)],backgroundColor:[fPct>=100?'#16a34a':fPct>=80?'#d97706':'#dc2626','#f0efe9'],borderWidth:0}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false},title:{display:true,text:[`${fPct}% del forecast`,`Cuota: ${fmt(CUOTA)}`],font:{size:13},color:'#1a1a18'}}}});
+  mkChart('ch-forecast',{type:'doughnut',data:{datasets:[{data:[Math.min(fPct,100),Math.max(100-fPct,0)],backgroundColor:[fPct>=100?'#16a34a':fPct>=80?'#d97706':'#dc2626','#f0efe9'],borderWidth:0}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false},title:{display:true,text:[`${fPct}% del forecast`,`Ganado ${fmt(totalGanado)} + Esp. ${fmt(totalEsp)}`,`Cuota: ${fmt(CUOTA)}`],font:{size:12},color:'#1a1a18'}}}});
 
   // Funnel
   const estadoOrd=['Identificado','Cotizado','En diseño','Negociación','On hold'];
