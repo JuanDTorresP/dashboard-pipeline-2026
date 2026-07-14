@@ -662,6 +662,8 @@ function openOppModal(deal){
   if(typeof deal === 'number') deal = window._tableData && window._tableData[deal];
   if(deal && !canEdit(deal)){ alert('No tienes permisos para editar esta oportunidad.'); return; }
   _editingKey = (deal && deal._key) ? deal._key : null;
+  // Conservar el año de inicio original al editar (ej. oportunidades identificadas en 2025)
+  window._editingAnioInicio = (deal && deal.anio_inicio) ? deal.anio_inicio : null;
   document.getElementById('modal-title').textContent = deal ? 'Editar Oportunidad' : 'Nueva Oportunidad';
   document.getElementById('btn-delete-opp').style.display = deal ? 'block' : 'none';
   var fields = ['oportunidad','cuenta','rep','estado','tipo','canal','origen','riesgo','segmento','mes_inicio','mes_radicacion','broker','motivo_perdida','comentarios'];
@@ -726,7 +728,7 @@ function saveOpp(){
     broker:document.getElementById('f-broker').value,
     motivo_perdida:document.getElementById('f-motivo_perdida').value,
     comentarios:document.getElementById('f-comentarios').value,
-    anio_inicio:2026,
+    anio_inicio:(_editingKey && window._editingAnioInicio) ? window._editingAnioInicio : ANIO_CUOTA,
     anio_radicacion:(parseInt(document.getElementById('f-anio_radicacion').value,10) || new Date().getFullYear())
   };
   setSyncStatus('syncing');
@@ -805,17 +807,19 @@ function renderRepView(){
   var rc = document.getElementById('rep-view-container');
   if(!rc) return;
   var src = liveDeals.length>0 ? liveDeals : RAW;
-  var myDeals = src.filter(function(d){ return d.rep===currentRep && d.oportunidad && d.cuenta; });
+  // Solo se suman negocios del año en curso (2026); años anteriores no cuentan
+  var myDeals = src.filter(function(d){ return d.rep===currentRep && d.oportunidad && d.cuenta && esDelAnioCuota(d); });
   var activos  = myDeals.filter(function(d){ return ESTADOS_ACTIVOS.has(d.estado); });
   var ganados  = myDeals.filter(function(d){ return d.estado==='Ganado'; });
   var perdidos = myDeals.filter(function(d){ return d.estado==='Perdido'; });
   var cerrados = ganados.concat(perdidos);
-  var vT = myDeals.reduce(function(s,d){ return s+(d.valor||0); },0);
-  var vA = activos.reduce(function(s,d){ return s+(d.valor||0); },0);
-  var vG = ganados.reduce(function(s,d){ return s+(d.valor||0); },0);
-  var vP = perdidos.reduce(function(s,d){ return s+(d.valor||0); },0);
-  var vE = activos.reduce(function(s,d){ return s+(d.esperado||0); },0);
+  var vT = myDeals.reduce(function(s,d){ return s+(parseFloat(d.valor)||0); },0);
+  var vA = activos.reduce(function(s,d){ return s+(parseFloat(d.valor)||0); },0);
+  var vG = ganados.reduce(function(s,d){ return s+(parseFloat(d.valor)||0); },0);
+  var vP = perdidos.reduce(function(s,d){ return s+(parseFloat(d.valor)||0); },0);
+  var vE = activos.reduce(function(s,d){ var v=parseFloat(d.valor)||0, p=parseFloat(d.prob)||0; var e=(d.esperado!=null&&!isNaN(parseFloat(d.esperado)))?parseFloat(d.esperado):Math.round(v*p); return s+e; },0);
   var wr = cerrados.length>0 ? Math.round(ganados.length/cerrados.length*100) : 0;
+  computeQuotaReps(); // cumplimiento en vivo: solo Ganados 2026
   var qd = QUOTA_REPS.find(function(q){ return q.rep===currentRep; }) || {cuota:0,cumplimiento:0,porcentaje:0,to_go:0};
   var pct = Math.min(qd.porcentaje||0, 100);
   var bc  = pct>=100?'#16a34a':pct>=50?'#d97706':'#dc2626';
@@ -908,6 +912,9 @@ function renderRepTable(){
   var wrap = document.getElementById('rep-table-wrap');
   if(!wrap) return;
   var src = liveDeals.length>0 ? liveDeals : RAW;
+  // La tabla lista TODAS las oportunidades del rep (incluidas las de radicación
+  // 2027+ y las cerradas de otros años). Las métricas de arriba sí se limitan
+  // a lo que suma a la cuota 2026 (ver esDelAnioCuota).
   var all = src.filter(function(d){ return d.rep===currentRep && d.oportunidad && d.cuenta; });
   var flt;
   if(_repTableFilter==='todos')        flt=all;
@@ -1050,6 +1057,7 @@ function initApp(){
 function renderQuotaBars(){
   var el=document.getElementById('quota-progress-block');
   if(!el) return;
+  computeQuotaReps(); // cumplimiento en vivo: solo negocios Ganados de 2026
   function fmtQ(v){ return v>=1e9?'$'+(v/1e9).toFixed(1)+'B':v>=1e6?'$'+(v/1e6).toFixed(0)+'M':'$'+(v/1e3).toFixed(0)+'K'; }
   var tC=QUOTA_REPS.reduce(function(s,r){ return s+r.cumplimiento; },0);
   var tQ=QUOTA_REPS.reduce(function(s,r){ return s+r.cuota; },0);
@@ -1092,9 +1100,10 @@ function renderQuotaBars(){
 
 // ═══════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
-// QUOTA REPS DATA
+// QUOTA REPS DATA — las metas (cuota) son fijas; cumplimiento, porcentaje y
+// to_go se RECALCULAN EN VIVO con computeQuotaReps() usando solo Ganados 2026.
 // ═══════════════════════════════════════════════════════════
-var QUOTA_REPS = [{"rep":"Patricia","cuota":4500000000,"cumplimiento":960961006,"porcentaje":21.35,"to_go":3539038994},{"rep":"Clemencia","cuota":4500000000,"cumplimiento":794399142,"porcentaje":17.65,"to_go":3705600858},{"rep":"Ivan","cuota":4500000000,"cumplimiento":4866836,"porcentaje":0.11,"to_go":4495133164},{"rep":"Elizabeth","cuota":5400000000,"cumplimiento":408930613,"porcentaje":7.57,"to_go":4991069387}];
+var QUOTA_REPS = [{"rep":"Patricia","cuota":4500000000,"cumplimiento":0,"porcentaje":0,"to_go":4500000000},{"rep":"Clemencia","cuota":4500000000,"cumplimiento":0,"porcentaje":0,"to_go":4500000000},{"rep":"Ivan","cuota":4500000000,"cumplimiento":0,"porcentaje":0,"to_go":4500000000},{"rep":"Elizabeth","cuota":5400000000,"cumplimiento":0,"porcentaje":0,"to_go":5400000000}];
 
 // ═══════════════════════════════════════════════════════════
 // OVERRIDE getCleanData
@@ -1135,6 +1144,47 @@ var _origApplyFilters = null;
 const CUOTA = 18900000000;
 const GANADO_TOTAL_REAL = 4234102788;
 const VALOR_ESP_AÑO = 15222226210;
+
+// ═══════════════════════════════════════════════════════════
+// AÑO EN CURSO — La cuota SOLO suma datos de 2026.
+// Regla: se usa el año de radicación; si falta, el año de inicio.
+// Un registro sin ningún año se asume del año en curso (fue creado
+// en esta app de Pipeline 2026). Todo registro marcado con un año
+// distinto de 2026 queda EXCLUIDO de métricas, forecast y cuota.
+// ═══════════════════════════════════════════════════════════
+const ANIO_CUOTA = 2026;
+function anioDeal(r){
+  var a = parseInt(r && r.anio_radicacion, 10);
+  if(!isNaN(a) && a > 1990) return a;
+  a = parseInt(r && r.anio_inicio, 10);
+  if(!isNaN(a) && a > 1990) return a;
+  return null;
+}
+function esDelAnioCuota(r){
+  var a = anioDeal(r);
+  if(r && ESTADOS_ACTIVOS.has(r.estado)){
+    // ABIERTAS: suman al pipeline/forecast 2026 si su radicación es de 2026
+    // o anterior (ej. identificadas en 2025 y aún sin cerrar, que cerrarán ahora).
+    // Las planificadas para radicar en 2027, 2028... son CUOTA FUTURA:
+    // siguen visibles en las tablas pero NO suman a las métricas 2026.
+    return a === null || a <= ANIO_CUOTA;
+  }
+  // CERRADAS (Ganado/Perdido/abandonado): solo suman las del año en curso.
+  return a === null || a === ANIO_CUOTA;
+}
+
+// Cumplimiento por rep calculado EN VIVO solo con negocios Ganados de 2026
+function computeQuotaReps(){
+  var src = (window._liveData && window._liveData.length > 0) ? window._liveData : RAW;
+  QUOTA_REPS.forEach(function(q){
+    var cum = src
+      .filter(function(d){ return d && d.rep === q.rep && d.estado === 'Ganado' && d.oportunidad && d.cuenta && esDelAnioCuota(d); })
+      .reduce(function(s, d){ return s + (parseFloat(d.valor) || 0); }, 0);
+    q.cumplimiento = cum;
+    q.porcentaje = q.cuota > 0 ? Math.round(cum / q.cuota * 10000) / 100 : 0;
+    q.to_go = Math.max(q.cuota - cum, 0);
+  });
+}
 
 // ═══════════════════════════════════════
 //  CONSTANTS
@@ -1179,6 +1229,7 @@ function getAv(rep){if(!avMap[rep]){const keys=Object.keys(avMap);avMap[rep]=AV_
 //  FILTER STATE
 // ═══════════════════════════════════════
 let filtered=[];
+let filtered26=[]; // subconjunto de "filtered" que pertenece al año en curso (2026)
 let sortKey='valor', sortDir=-1;
 let charts={};
 
@@ -1396,32 +1447,36 @@ function mkChart(id,config){
 //  RENDER
 // ═══════════════════════════════════════
 function render(){
-  const activos=filtered.filter(r=>ESTADOS_ACTIVOS.has(r.estado));
-  const ganados=filtered.filter(r=>r.estado==='Ganado');
-  const perdidos=filtered.filter(r=>r.estado==='Perdido'||r.estado==='abandonado');
+  // La cuota y todas las métricas suman ÚNICAMENTE datos del año en curso (2026).
+  // Registros de otros años siguen visibles en la tabla, pero NO se suman.
+  filtered26=filtered.filter(esDelAnioCuota);
+  const activos=filtered26.filter(r=>ESTADOS_ACTIVOS.has(r.estado));
+  const ganados=filtered26.filter(r=>r.estado==='Ganado');
+  const perdidos=filtered26.filter(r=>r.estado==='Perdido'||r.estado==='abandonado');
   const totalActivo=activos.reduce((a,r)=>a+r.valor,0);
   const totalEsp=activos.reduce((a,r)=>a+r.esperado,0);
   const totalGanado=ganados.reduce((a,r)=>a+r.valor,0);
   const totalPerdido=perdidos.reduce((a,r)=>a+r.valor,0);
-  // Forecast en vivo: (ganado + valor esperado del pipeline activo) / cuota
+  // Forecast en vivo (solo 2026): (ganado + valor esperado del pipeline activo) / cuota
   const fPct=Math.round((totalGanado+totalEsp)/CUOTA*100*10)/10;
 
   renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanado,totalPerdido,fPct);
   renderVendedor(activos,ganados);
   renderTable(filtered);
   renderGanadasPerdidas(ganados,perdidos,totalGanado,totalPerdido);
+  renderQuotaBars();
 }
 
 // ── GERENCIA ──────────────────────────
 function renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanado,totalPerdido,fPct){
   // Metrics
   document.getElementById('mg-metricas').innerHTML=`
-    <div class="m-card accent clickable" onclick="openSidePanel('activo',filtered)" title="Ver pipeline activo"><div class="m-lbl">Pipeline activo</div><div class="m-val">${fmt(totalActivo)}</div><div class="m-sub">${activos.length} oportunidades ↗</div></div>
-    <div class="m-card clickable" onclick="openSidePanel('activo',filtered)" title="Ver pipeline activo"><div class="m-lbl">Valor esperado</div><div class="m-val">${fmt(totalEsp)}</div><div class="m-sub">ponderado por prob.</div></div>
-    <div class="m-card clickable" onclick="openSidePanel('Ganado',filtered)" title="Ver oportunidades ganadas"><div class="m-lbl">Ganado 2026</div><div class="m-val" style="color:var(--green)">${fmt(totalGanado)}</div><div class="m-sub">${ganados.length} oportunidades ↗</div></div>
+    <div class="m-card accent clickable" onclick="openSidePanel('activo',filtered26)" title="Ver pipeline activo"><div class="m-lbl">Pipeline activo</div><div class="m-val">${fmt(totalActivo)}</div><div class="m-sub">${activos.length} oportunidades ↗</div></div>
+    <div class="m-card clickable" onclick="openSidePanel('activo',filtered26)" title="Ver pipeline activo"><div class="m-lbl">Valor esperado</div><div class="m-val">${fmt(totalEsp)}</div><div class="m-sub">ponderado por prob.</div></div>
+    <div class="m-card clickable" onclick="openSidePanel('Ganado',filtered26)" title="Ver oportunidades ganadas"><div class="m-lbl">Ganado 2026</div><div class="m-val" style="color:var(--green)">${fmt(totalGanado)}</div><div class="m-sub">${ganados.length} oportunidades ↗</div></div>
     <div class="m-card"><div class="m-lbl">Cuota Bogotá</div><div class="m-val">${fmt(CUOTA)}</div><div class="m-sub">meta anual</div></div>
-    <div class="m-card"><div class="m-lbl">Forecast</div><div class="m-val" style="color:${fPct>=100?'var(--green)':fPct>=80?'var(--amber)':'var(--red)'}">${fPct}%</div><div class="m-sub">(ganado + val.esp) / cuota</div></div>
-    <div class="m-card clickable" onclick="openSidePanel('Perdido',filtered)" title="Ver oportunidades perdidas"><div class="m-lbl">Perdido</div><div class="m-val" style="color:var(--red)">${fmt(totalPerdido)}</div><div class="m-sub">${perdidos.length} oportunidades ↗</div></div>
+    <div class="m-card"><div class="m-lbl">Forecast</div><div class="m-val" style="color:${fPct>=100?'var(--green)':fPct>=80?'var(--amber)':'var(--red)'}">${fPct}%</div><div class="m-sub">(ganado + val.esp) 2026 / cuota</div></div>
+    <div class="m-card clickable" onclick="openSidePanel('Perdido',filtered26)" title="Ver oportunidades perdidas"><div class="m-lbl">Perdido</div><div class="m-val" style="color:var(--red)">${fmt(totalPerdido)}</div><div class="m-sub">${perdidos.length} oportunidades ↗</div></div>
   `;
 
   // Forecast donut
@@ -1435,7 +1490,7 @@ function renderGerencia(activos,ganados,perdidos,totalActivo,totalEsp,totalGanad
     const sub=activos.filter(r=>r.estado===e);
     const v=sub.reduce((a,r)=>a+r.valor,0);
     const w=maxV>0?Math.round(v/maxV*100):0;
-    return`<div class="funnel-bar" onclick="openSidePanel('${e}',filtered)" title="Ver oportunidades en estado ${e}">
+    return`<div class="funnel-bar" onclick="openSidePanel('${e}',filtered26)" title="Ver oportunidades en estado ${e}">
       <span class="funnel-label">${e}</span>
       <div class="funnel-track"><div class="funnel-fill" style="width:${w}%;background:${fColors[i]}">${fmt(v)}</div></div>
       <span class="funnel-count">${sub.length} ops</span>
